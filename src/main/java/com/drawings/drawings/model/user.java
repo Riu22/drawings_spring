@@ -1,7 +1,5 @@
 package com.drawings.drawings.model;
 
-
-
 public class user {
     int id;
     String name;
@@ -14,10 +12,18 @@ public class user {
         this.username = username;
     }
 
-    public user(){
-
+    public user(int id, String name, String password, String username){
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.username = username;
     }
 
+    // 3. Constructor vacío
+    public user(){
+    }
+
+    // Getters y Setters
     public int getId() {
         return id;
     }

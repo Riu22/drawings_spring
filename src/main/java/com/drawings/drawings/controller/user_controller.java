@@ -1,5 +1,6 @@
 package com.drawings.drawings.controller;
 
+import com.drawings.drawings.service.login_service;
 import com.drawings.drawings.service.register_service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,10 @@ public class user_controller {
     @Autowired
     private register_service register_service;
 
+    @Autowired
+    private login_service login_service;
+
+
     @GetMapping("/")
     public String index(){
         return "index";
@@ -24,8 +29,11 @@ public class user_controller {
     }
 
     @PostMapping("/login")
-    public String correct_login(){
-        return "drawing";
+    public String correct_login(@RequestParam String username, @RequestParam String password){
+        if(login_service.check_user(username, password)) {
+            return "drawing";
+        }
+        return "index";
     }
 
     @GetMapping("/register")
