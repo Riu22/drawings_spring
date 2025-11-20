@@ -1,0 +1,27 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="/index.css">
+</head>
+<body>
+<div class="container">
+    <h1>Login</h1>
+
+    <div th:text="${error}" class="error-message" style="margin-top: 15px;"></div>
+
+    <form method="post" action="/login">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required autocomplete="off">
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <input type="submit" value="Login">
+    </form>
+
+    <div style="margin-top: 20px;">
+        <a href="/register" class="button-link">Registrar</a>
+    </div>
+</div>
+</body>
+</html>

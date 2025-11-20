@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -7,16 +7,17 @@
 <body>
 
 <h1>HOla mundo</h1>
+<div th:text="${error}"></div>
 <form action="/register" method="post">
     <input type="text" name="name" placeholder="Name"></input>
-    <input type="text" name="password" placeholder="Password"></input>
-    <input type="text" name="username" placeholder="Username"></input>
+    <input type="text" name="password" placeholder="Password" autocomplete="off"></input>
+    <input type="text" name="username" placeholder="Username" autocomplete="off"></input>
     <button type="submit">Register</button>
 </form>
 <form action="/login" method="post">
-    <input type="text" name="password" placeholder="Password"></input>
-    <input type="text" name="username" placeholder="Username"></input>
-    <button type="submit">Register</button>
+    <input type="text" name="password" placeholder="Password" autocomplete="off"></input>
+    <input type="text" name="username" placeholder="Username" autocomplete="off"></input>
+    <button type="submit">login</button>
 </form>
 </body>
 </html>

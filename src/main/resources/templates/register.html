@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+<div class="container">
+    <h1>Register</h1>
+    <div th:text="${error}" class="error-message" style="margin-top: 15px;"></div>
+
+    <form method="post" action="/register">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required autocomplete="off">
+
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required autocomplete="off">
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+
+    <input type="submit" id="registerButton" value="Register">
+    </form>
+    <div id="passwordError" class="error-message" style="margin-top: 15px;"></div>
+</div>
+</body>
+</html>
