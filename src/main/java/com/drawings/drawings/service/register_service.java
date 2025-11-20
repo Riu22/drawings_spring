@@ -28,7 +28,7 @@ public class register_service {
 
 
 }
- class user_exists_exception extends RuntimeException {
+class user_exists_exception extends RuntimeException {
     public user_exists_exception(String message) {
         super(message);
     }
