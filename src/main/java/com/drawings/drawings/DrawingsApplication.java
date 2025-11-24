@@ -1,15 +1,20 @@
 package com.drawings.drawings;
 
+import com.drawings.drawings.interceptor.session_interceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import javax.sql.DataSource;
 
 @SpringBootApplication
-public class DrawingsApplication {
+public class DrawingsApplication implements WebMvcConfigurer {
 
     public static void main(String[] args) {
         SpringApplication.run(DrawingsApplication.class, args);
@@ -36,5 +41,14 @@ public class DrawingsApplication {
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource){
         return new JdbcTemplate(dataSource);
+    }
+
+    @Autowired
+    private session_interceptor interceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor)
+                .addPathPatterns("/drawing/**");
     }
 }
