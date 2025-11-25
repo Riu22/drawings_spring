@@ -18,11 +18,14 @@
     <input type="text" id="username" name="username" required autocomplete="off">
 
     <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
+    <input type="password" id="password" name="password" required autocomplete="off">
+    <label for="confirmPassword">Confirm Password:</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off">
 
     <input type="submit" id="registerButton" value="Register">
     </form>
     <div id="passwordError" class="error-message" style="margin-top: 15px;"></div>
 </div>
+<script src="/js/check_password.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>Home</title>
     <link rel="stylesheet" href="/css/home.css">
@@ -9,7 +9,7 @@
     <nav class="sidebar">
         <a href="/home" class="brand">Drawings</a>
         <div class="user-info">
-            <span>Bienvenido, ${user}!</span>
+            <span>Bienvenido,<span th:text="${username}"></span> </span>
         </div>
         <a href="/gallery">Gallery</a>
         <a href="/logout">Logout</a>
