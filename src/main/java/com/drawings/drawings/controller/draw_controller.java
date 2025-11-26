@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class draw_controller {
-    @GetMapping("/drawing")
+    @GetMapping("/home")
     public String drawing(HttpSession session, Model model){
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
