@@ -19,10 +19,7 @@ import java.util.NoSuchElementException;
 
 @Controller
 public class draw_controller {
-    @Autowired
-    private save_service save_service;
-
-    @GetMapping("/drawing")
+    @GetMapping("/home")
     public String drawing(HttpSession session, Model model){
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);

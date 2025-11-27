@@ -34,7 +34,7 @@ public class user_controller {
     public String correct_login(@RequestParam String username, @RequestParam String password, HttpSession session, Model model){
         if(login_service.check_user(username, password)) {
             session.setAttribute("username", username);
-            return "redirect:/drawing";
+            return "redirect:/home";
         }
         model.addAttribute("error", "Invalid username or password");
         return "login";
