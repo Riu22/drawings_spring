@@ -15,6 +15,7 @@ CREATE TABLE draw (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ispublic BOOLEAN NOT NULL DEFAULT FALSE,
     -- Clave foránea 1:N con Users.
     -- El usuario que creó el dibujo.
     user_id INT NOT NULL,
@@ -59,13 +60,13 @@ CREATE TABLE version (
 -- Una versión (Version) solo tiene un conjunto de datos de dibujo (Draw_Data).
 DROP TABLE IF EXISTS draw_data;
 CREATE TABLE draw_data (
-    version_id INT NOTTERY PRIMARY KEY,
-    draw_content TEXT NOT NULL, --string de json en el cliente mandar el string de un json
-    -- Clave foránea 1:1 con Version.
-    -- Se usa la misma columna como PK y FK para garantizar la relación 1:1
+    version_id INT NOT NULL PRIMARY KEY,
+    draw_content TEXT NOT NULL,
     FOREIGN KEY (version_id) REFERENCES version(id) ON DELETE CASCADE
 );
-
+-- string de json en el cliente mandar el string de un json
+    -- Clave foránea 1:1 con Version.
+    -- Se usa la misma columna como PK y FK para garantizar la relación 1:1
 
 
 

@@ -8,13 +8,22 @@ public class draw {
     private int user_id;
     private String title;
     private Timestamp created_at;
+    private boolean ispublic;
 
-    public draw(int id, int user_id, String title, Timestamp created_at) {
+    //constructor para el rowmapper
+    public draw(int id, int user_id, String title, Timestamp created_at, boolean ispublic) {
         this.id = id;
         this.user_id = user_id;
         this.title = title;
         this.created_at = created_at;
+        this.ispublic = ispublic;
 
+    }
+    //constructor de creacion
+    public draw(int user_id, String title, boolean ispublic) {
+        this.user_id = user_id;
+        this.title = title;
+        this.ispublic = ispublic;
     }
 
     public int getId() {
@@ -48,5 +57,12 @@ public class draw {
 
     public void setCreated_at(Timestamp created_at) {
         this.created_at = created_at;
+    }
+
+    public boolean isPublic() {
+        return ispublic;
+    }
+    public void setPublic(boolean ispublic) {
+        this.ispublic = ispublic;
     }
 }
