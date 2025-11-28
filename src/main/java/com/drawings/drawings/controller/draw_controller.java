@@ -32,7 +32,7 @@ public class draw_controller {
         String author = (String) session.getAttribute("username");
         //hacer el dao para pillar el id por el author
         try {
-            // 1. Obtener los datos del DTO
+            // 1 Obtener los datos del DTO
             draw saved_draw = save_service.save_draw(
                     drawDto.getTitle(),
                     drawDto.isIspublic(),
