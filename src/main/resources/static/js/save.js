@@ -1,6 +1,6 @@
 document.getElementById('saveButton').addEventListener('click', async () => {
 
-    const canvasData = getCanvasData();
+    const canvasData = windows.getCanvasData();
 
     // 2. Pedir información adicional al usuario
     const title = prompt("Por favor, introduce un título para tu dibujo:");

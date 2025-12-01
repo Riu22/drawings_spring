@@ -664,4 +664,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Guardar estado inicial vacío en historial
     save_history();
     update_object_list();
+
+    window.getCanvasData = function() {
+        return JSON.stringify(drawingHistory);
+    };
+    
+    window.loadDrawing = function(jsonString) {
+        try {
+            const loadedHistory = JSON.parse(jsonString);
+            drawingHistory.length = 0; 
+            drawingHistory.push(...loadedHistory);
+            redrawCanvas(); // Redibuja el canvas con los datos cargados
+        } catch (e) {
+            console.error("Error al cargar el dibujo JSON:", e);
+        }
+    };
 });
