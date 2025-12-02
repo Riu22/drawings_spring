@@ -48,7 +48,7 @@ public class draw_dao {
             return ps;
         }, keyHolder);
 
-        // Asignamos el ID generado
+        // Assignacion del id generado
         Optional.ofNullable(keyHolder.getKey()).ifPresent(key ->
                 newDraw.setId(key.intValue())
         );
