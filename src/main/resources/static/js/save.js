@@ -15,7 +15,7 @@ document.getElementById('saveButton').addEventListener('click', async () => {
     const dataToSend = {
         title: title,
         ispublic: ispublic,
-        drawContent: canvasData,
+        draw_content: canvasData,
     };
 
     console.log("Enviando datos de dibujo:", dataToSend);

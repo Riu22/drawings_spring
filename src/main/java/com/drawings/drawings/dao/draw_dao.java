@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
 @Repository
@@ -62,6 +61,11 @@ public class draw_dao {
     }
 
     public void add_draw_content(int versionId, String drawContent){
+        if (drawContent == null) {
+            System.out.println("Intentando insertar NULL en draw_content para versionId: {}" + versionId);
+            throw new IllegalArgumentException("El contenido del dibujo no puede ser nulo.");
+        }
+        System.out.println("Insertando contenido de dibujo. Longitud: {} caracteres." + drawContent.length());
         String sql = "INSERT INTO draw_data (version_id, draw_content) VALUES (?, ?)";
         jdbcTemplate.update(sql, versionId, drawContent);
     }

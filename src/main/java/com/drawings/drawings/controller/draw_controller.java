@@ -33,6 +33,7 @@ public class draw_controller {
         int id_author = save_service.iduser(author);
 
         try {
+            System.out.println("DEBUG: draw_content recibido: " + draw_request.draw_content());
             draw saved_draw = save_service.save_draw(
                     draw_request.title(),
                     draw_request.ispublic(),
