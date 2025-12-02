@@ -25,24 +25,18 @@ document.getElementById('saveButton').addEventListener('click', async () => {
         const response = await fetch('/save', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-
-            },
+                    'Content-Type': 'application/json'
+                    },
             body: JSON.stringify(dataToSend)
         });
 
-        // 5. Manejar la respuesta del servidor
-        if (response.ok) {
-            const result = await response.json();
-            alert(`Dibujo guardado con éxito! ID: ${result.id}`);
-            window.location.href = '/gallery';
-        } else {
-            const error = await response.json();
-            console.error('Error al guardar el dibujo:', error);
-            alert(`Error al guardar: ${error.message || response.statusText}`);
+        if (response.status != 200 ) {
+            throw new Error("Error del servidor: " + response.status);
         }
-    } catch (error) {
-        console.error('Fallo en la conexión:', error);
-        alert('Fallo al conectar con el servidor.');
-    }
+        }catch (error) {
+            console.error("Error al guardar el dibujo:", error);
+            alert("Hubo un error al guardar el dibujo. Por favor, inténtalo de nuevo.");
+            return;
+        }
+    alert("¡Dibujo guardado con éxito!");
 });

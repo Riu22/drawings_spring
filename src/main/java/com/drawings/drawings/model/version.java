@@ -11,6 +11,8 @@ public class version {
     public version(int id, int version_number, Timestamp created_at, int draw_id) {
         this.id = id;
         this.version_number = version_number;
+        this.created_at = created_at;
+        this.draw_id = draw_id;
     }
 
     public int getId() {

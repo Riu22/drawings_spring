@@ -2,6 +2,9 @@ package com.drawings.drawings.controller;
 
 import com.drawings.drawings.records.draw_request;
 import com.drawings.drawings.model.draw;
+import com.drawings.drawings.records.gallery_record;
+import com.drawings.drawings.service.gallery_service;
+import com.drawings.drawings.service.public_service;
 import com.drawings.drawings.service.save_service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,12 +16,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Controller
 public class draw_controller {
     @Autowired
     save_service save_service;
+    @Autowired
+    gallery_service gallery_service;
+    @Autowired
+    public_service public_service;
     @GetMapping("/home")
     public String drawing(HttpSession session, Model model){
         String username = (String) session.getAttribute("username");
@@ -33,15 +41,14 @@ public class draw_controller {
         int id_author = save_service.iduser(author);
 
         try {
-            System.out.println("DEBUG: draw_content recibido: " + draw_request.draw_content());
             draw saved_draw = save_service.save_draw(
                     draw_request.title(),
                     draw_request.ispublic(),
                     id_author,
                     draw_request.draw_content()
             );
-            response.setStatus(200);
-            return "redirect:/gallery";
+
+            return "redirect:/login";
 
         } catch (NoSuchElementException e) {
             System.err.println("Error al guardar el dibujo: " + e.getMessage());
@@ -51,5 +58,18 @@ public class draw_controller {
             return "redirect:/error?message=Fallo al guardar el dibujo";
         }
     }
+    @GetMapping("/gallery")
+    public String gallery(Model model,HttpSession session){
+        int owner_id = save_service.iduser((String) session.getAttribute("username"));
+        List<gallery_record> draw=gallery_service.select_owners_draw_details(owner_id);
+        model.addAttribute("draws",draw);
+        return "gallery";
+    }
 
+    @GetMapping("/pub_gallery")
+    public String public_gallery(Model model){
+        List<gallery_record> draw= public_service.select_public_draw_details();
+        model.addAttribute("draws",draw);
+        return "gallerypub";
+    }
 }

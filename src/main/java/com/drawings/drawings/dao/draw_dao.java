@@ -1,20 +1,26 @@
 package com.drawings.drawings.dao;
 
 import com.drawings.drawings.model.draw;
+import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.model.permissions;
+import com.drawings.drawings.model.version;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import java.util.List; // Importado para select_owners_draws
 import java.util.Optional;
 
 @Repository
 public class draw_dao {
-    private final JdbcTemplate  jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
     public draw_dao(JdbcTemplate jdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
     }
+
 
     private RowMapper<draw> drawRowMapper(){
         return (rs, rowNum) -> new draw(
@@ -23,6 +29,22 @@ public class draw_dao {
                 rs.getString("title"),
                 rs.getTimestamp("created_at"),
                 rs.getBoolean("ispublic")
+        );
+    }
+
+    RowMapper<version> versionRowMapper(){
+        return (rs, rowNum) -> new version(
+                rs.getInt("id"),
+                rs.getInt("version_number"),
+                rs.getTimestamp("created_at"),
+                rs.getInt("draw_id")
+        );
+    }
+
+    private RowMapper<draw_data> drawDataRowMapper(){
+        return (rs, rowNum) -> new draw_data(
+                rs.getInt("version_id"),
+                rs.getString("draw_content")
         );
     }
 
@@ -55,17 +77,8 @@ public class draw_dao {
 
         return newDraw;
     }
-    public void add_permissions(){
-        String sql = " INSERT INTO permissios (user_id, draw_id, can_read, can_write) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, 1, 1, true, true);
-    }
 
     public void add_draw_content(int versionId, String drawContent){
-        if (drawContent == null) {
-            System.out.println("Intentando insertar NULL en draw_content para versionId: {}" + versionId);
-            throw new IllegalArgumentException("El contenido del dibujo no puede ser nulo.");
-        }
-        System.out.println("Insertando contenido de dibujo. Longitud: {} caracteres." + drawContent.length());
         String sql = "INSERT INTO draw_data (version_id, draw_content) VALUES (?, ?)";
         jdbcTemplate.update(sql, versionId, drawContent);
     }
@@ -84,4 +97,34 @@ public class draw_dao {
     }
 
 
+    public List<draw> select_owners_draws(int userId){
+        String sql ="SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ?";
+        return jdbcTemplate.query(sql, drawRowMapper(), userId);
+    }
+
+
+    public version select_latest_draw_version(int draw_id){
+        String sql = "SELECT id, draw_id, version_number, created_at FROM version WHERE draw_id = ? ORDER BY version_number DESC LIMIT 1";
+        try {
+            return jdbcTemplate.queryForObject(sql, versionRowMapper(), draw_id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+
+
+    public draw_data select_draw_data(int version_id){
+        String sql = "SELECT version_id, draw_content FROM draw_data WHERE version_id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, drawDataRowMapper(), version_id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    public List<draw> select_public_draws(){
+        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE ispublic = true";
+        return jdbcTemplate.query(sql, drawRowMapper());
+    }
 }
