@@ -4,6 +4,7 @@ import com.drawings.drawings.records.draw_request;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.records.gallery_record;
 import com.drawings.drawings.service.gallery_service;
+import com.drawings.drawings.service.load_service;
 import com.drawings.drawings.service.public_service;
 import com.drawings.drawings.service.save_service;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,11 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Controller
 public class draw_controller {
@@ -27,6 +30,9 @@ public class draw_controller {
     gallery_service gallery_service;
     @Autowired
     public_service public_service;
+    @Autowired
+    load_service load_service;
+
     @GetMapping("/home")
     public String drawing(HttpSession session, Model model){
         String username = (String) session.getAttribute("username");
@@ -58,6 +64,7 @@ public class draw_controller {
             return "redirect:/error?message=Fallo al guardar el dibujo";
         }
     }
+
     @GetMapping("/gallery")
     public String gallery(Model model,HttpSession session){
         int owner_id = save_service.iduser((String) session.getAttribute("username"));
@@ -71,5 +78,24 @@ public class draw_controller {
         List<gallery_record> draw= public_service.select_public_draw_details();
         model.addAttribute("draws",draw);
         return "gallerypub";
+    }
+
+    @GetMapping("/draw/{drawId}")
+    public String load_draw(@PathVariable("drawId") int drawId, Model model, HttpSession session){
+        int owner_id = save_service.iduser((String) session.getAttribute("username"));
+        try {
+            Optional<draw> optionalDraw = load_service.get_draw_metadata(drawId);
+            draw drawMetadata = optionalDraw.get();
+            if (!drawMetadata.isPublic() && drawMetadata.getUser_id() != owner_id) {
+                return "redirect:/error?message=Acceso denegado al dibujo";
+            }
+            Optional<String> optionalContent = load_service.load_draw_content(drawId);
+            String drawContentJson = optionalContent.orElse("[]");
+            model.addAttribute("drawId", drawId);
+            model.addAttribute("drawContentJson", drawContentJson);
+            return "draw";
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

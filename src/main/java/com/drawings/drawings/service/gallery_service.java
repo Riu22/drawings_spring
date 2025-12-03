@@ -21,17 +21,17 @@ public class gallery_service {
         List<gallery_record> gallery_items = new ArrayList<>();
 
         for (draw d : draws) {
-            version latestVersion = draw_dao.select_latest_draw_version(d.getId());
+            version latest_version = draw_dao.select_latest_draw_version(d.getId());
 
-            int versionNumber = 0;
-            String drawContent = "";
+            int version_number = 0;
+            String draw_nontent = "";
 
-            if (latestVersion != null) {
-                versionNumber = latestVersion.getVersion_number();
-                draw_data data = draw_dao.select_draw_data(latestVersion.getId());
+            if (latest_version != null) {
+                version_number = latest_version.getVersion_number();
+                draw_data data = draw_dao.select_draw_data(latest_version.getId());
 
                 if (data != null && data.getDraw_content() != null) {
-                    drawContent = data.getDraw_content();
+                    draw_nontent = data.getDraw_content();
                 }
             }
 
@@ -41,8 +41,8 @@ public class gallery_service {
                     d.getTitle(),
                     d.getCreated_at(),
                     d.isPublic(),
-                    versionNumber,
-                    drawContent
+                    version_number,
+                    draw_nontent
             );
 
             gallery_items.add(item);
