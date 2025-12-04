@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${drawTitle} ? 'Ver: ' + ${drawTitle} : 'Dibujo Cargado'">Lienzo de Dibujo</title>
+    <style>
+        /* Estilos básicos para el lienzo */
+        #drawing_canvas {
+            border: 2px solid #333;
+            background-color: #fff;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${drawTitle}">Dibujo Cargado</h1>
+<p>Autor: <span th:text="${username}"></span></p>
+
+<canvas id="drawing_canvas" width="800" height="600"></canvas>
+
+<script th:inline="javascript">
+
+    // =========================================================================
+    // 2.1 Variables Globales y Contexto
+    // =========================================================================
+
+    const canvas = document.getElementById('drawing_canvas');
+    const ctx = canvas.getContext('2d');
+    let objects = [];
+
+    // Variable que trae el JSON desde el modelo de Spring Boot/Thymeleaf.
+    // ¡Importante! Usa el nombre de la variable que usaste en el controller: 'drawContentJson'.
+    const draw_content_json = [[${drawContentJson}]] || null;
+
+
+    // =========================================================================
+    // 2.2 Funciones de Dibujo
+    // =========================================================================
+
+    /**
+     * Dibuja un único objeto (forma o trazo) en el Canvas.
+     */
+    function draw_object(obj) {
+
+        ctx.fillStyle = obj.color;
+        ctx.strokeStyle = obj.color;
+
+        // Lógica para el TRAZO LIBRE (freeDraw)
+        if (obj.type === 'freeDraw') {
+            if (obj.points && obj.points.length > 0) {
+                ctx.lineWidth = obj.size || 5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.beginPath();
+                ctx.moveTo(obj.points[0].x, obj.points[0].y);
+
+                for (let i = 1; i < obj.points.length; i++) {
+                    ctx.lineTo(obj.points[i].x, obj.points[i].y);
+                }
+                ctx.stroke();
+            }
+
+        // Lógica para CÍRCULOS (circle)
+        } else if (obj.type === 'circle') {
+            const radius = (obj.size || 20) / 2;
+            ctx.beginPath();
+            ctx.arc(obj.x, obj.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+        // Lógica para CUADRADOS (square)
+        } else if (obj.type === 'square') {
+            const half_size = (obj.size || 40) / 2;
+            ctx.fillRect(obj.x - half_size, obj.y - half_size, obj.size, obj.size);
+        }
+        // ... Añadir lógica para otros tipos de formas ...
+    }
+
+    /**
+     * Limpia el lienzo y redibuja todos los objetos cargados.
+     */
+    function redraw_canvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        objects.forEach(obj => {
+            draw_object(obj);
+        });
+    }
+
+    // =========================================================================
+    // 2.3 Función de Carga
+    // =========================================================================
+
+    /**
+     * Carga el dibujo desde el JSON proporcionado por el servidor.
+     */
+    function load_drawing(json_string) {
+        console.log("Intentando cargar JSON...");
+        try {
+            // Analizar la cadena JSON
+            const loaded_objects = JSON.parse(json_string);
+
+            // Reemplazar la lista global con los objetos cargados
+            objects = loaded_objects;
+
+            // Pintar el Canvas
+            redraw_canvas();
+
+            console.log(`Dibujo cargado. ${objects.length} objetos dibujados.`);
+
+        } catch (e) {
+            console.error("Error al analizar el JSON. El formato puede ser incorrecto:", e);
+            // Si el JSON es inválido o el parseo falla, inicializa un lienzo vacío
+            objects = [];
+            redraw_canvas();
+        }
+    }
+
+    // =========================================================================
+    // 3. Ejecución al Cargar la Página
+    // =========================================================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si el servidor envió contenido JSON y no es solo el array vacío "[]"
+        if (draw_content_json && draw_content_json.length > 2) {
+            load_drawing(draw_content_json);
+        } else {
+            console.log("No hay contenido de dibujo para cargar. El lienzo está vacío.");
+        }
+    });
+
+</script>
+</body>
+</html>

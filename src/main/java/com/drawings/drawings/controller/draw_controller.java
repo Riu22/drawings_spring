@@ -82,20 +82,39 @@ public class draw_controller {
 
     @GetMapping("/draw/{drawId}")
     public String load_draw(@PathVariable("drawId") int draw_id, Model model, HttpSession session){
-        int owner_id = save_service.iduser((String) session.getAttribute("username"));
+
+        String username = (String) session.getAttribute("username");
         try {
+            int owner_id = save_service.iduser(username);
+
             Optional<draw> optional_draw = load_service.get_draw_metadata(draw_id);
+
+            if (optional_draw.isEmpty()) {
+                return "redirect:/error?message=Dibujo no encontrado";
+            }
+
             draw draw_metadata = optional_draw.get();
+
             if (!draw_metadata.isPublic() && draw_metadata.getUser_id() != owner_id) {
                 return "redirect:/error?message=Acceso denegado al dibujo";
             }
+
             Optional<String> optional_content = load_service.load_draw_content(draw_id);
             String draw_content_json = optional_content.orElse("[]");
+
             model.addAttribute("drawId", draw_id);
             model.addAttribute("drawContentJson", draw_content_json);
+            model.addAttribute("drawTitle", draw_metadata.getTitle());
+            model.addAttribute("username", username);
+
             return "viewdraw";
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+
+        } catch (java.util.NoSuchElementException e) {
+            return "redirect:/error?message=Usuario no válido";
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar el dibujo ID " + draw_id + ": " + e.getMessage());
+            return "redirect:/error?message=Error interno al cargar el dibujo";
         }
     }
 }

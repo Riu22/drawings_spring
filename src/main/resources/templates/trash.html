@@ -5,11 +5,9 @@
     <title>Title</title>
 </head>
 <body>
-<div th:each="drawing : ${draws}">
+<div th:each="drawing : ${trashed_draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
-    <p>Última Versión: <span th:text="${drawing.latest_version_number()}">1</span></p>
-    <p th:text="${drawing.draw_content()}"></p>
-    galerypub
+    <p>Última Versión: <span th:text="${username}">1</span></p>
 </div>
 </body>
 </html>

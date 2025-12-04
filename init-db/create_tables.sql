@@ -16,6 +16,7 @@ CREATE TABLE draw (
     title VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ispublic BOOLEAN NOT NULL DEFAULT FALSE,
+    in_trash BOOLEAN NOT NULL DEFAULT FALSE,
     -- Clave foránea 1:N con Users.
     -- El usuario que creó el dibujo.
     user_id INT NOT NULL,

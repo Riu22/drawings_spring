@@ -98,7 +98,7 @@ public class draw_dao {
 
 
     public List<draw> select_owners_draws(int userId){
-        String sql ="SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ?";
+        String sql ="SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ? AND in_trash = FALSE";
         return jdbcTemplate.query(sql, drawRowMapper(), userId);
     }
 
@@ -124,17 +124,22 @@ public class draw_dao {
     }
 
     public List<draw> select_public_draws(){
-        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE ispublic = true";
+        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE ispublic = true AND in_trash = FALSE";
         return jdbcTemplate.query(sql, drawRowMapper());
     }
 
     public Optional<draw> select_draw_by_id(int drawId) {
-        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE id = ?";
+        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE id = ? AND in_trash = FALSE";
         try {
             draw result = jdbcTemplate.queryForObject(sql, drawRowMapper(), drawId);
             return Optional.ofNullable(result);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public List<com.drawings.drawings.model.draw> select_trashed_draws(int user_id) {
+        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ? AND in_trash = TRUE";
+        return jdbcTemplate.query(sql, drawRowMapper(), user_id);
     }
 }
