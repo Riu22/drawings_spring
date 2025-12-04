@@ -81,19 +81,19 @@ public class draw_controller {
     }
 
     @GetMapping("/draw/{drawId}")
-    public String load_draw(@PathVariable("drawId") int drawId, Model model, HttpSession session){
+    public String load_draw(@PathVariable("drawId") int draw_id, Model model, HttpSession session){
         int owner_id = save_service.iduser((String) session.getAttribute("username"));
         try {
-            Optional<draw> optionalDraw = load_service.get_draw_metadata(drawId);
-            draw drawMetadata = optionalDraw.get();
-            if (!drawMetadata.isPublic() && drawMetadata.getUser_id() != owner_id) {
+            Optional<draw> optional_draw = load_service.get_draw_metadata(draw_id);
+            draw draw_metadata = optional_draw.get();
+            if (!draw_metadata.isPublic() && draw_metadata.getUser_id() != owner_id) {
                 return "redirect:/error?message=Acceso denegado al dibujo";
             }
-            Optional<String> optionalContent = load_service.load_draw_content(drawId);
-            String drawContentJson = optionalContent.orElse("[]");
-            model.addAttribute("drawId", drawId);
-            model.addAttribute("drawContentJson", drawContentJson);
-            return "draw";
+            Optional<String> optional_content = load_service.load_draw_content(draw_id);
+            String draw_content_json = optional_content.orElse("[]");
+            model.addAttribute("drawId", draw_id);
+            model.addAttribute("drawContentJson", draw_content_json);
+            return "viewdraw";
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }

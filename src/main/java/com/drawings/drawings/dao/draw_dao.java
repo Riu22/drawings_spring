@@ -127,4 +127,14 @@ public class draw_dao {
         String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE ispublic = true";
         return jdbcTemplate.query(sql, drawRowMapper());
     }
+
+    public Optional<draw> select_draw_by_id(int drawId) {
+        String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE id = ?";
+        try {
+            draw result = jdbcTemplate.queryForObject(sql, drawRowMapper(), drawId);
+            return Optional.ofNullable(result);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 }

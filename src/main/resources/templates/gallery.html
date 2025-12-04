@@ -8,7 +8,7 @@
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
     <p>Última Versión: <span th:text="${drawing.latestVersionNumber()}">1</span></p>
-
+    <button th:href="@{/load/{id}(id=${drawing.id()})}">Ver Dibujo</button>
 </div>
 <p>hola </p>
 </body>
