@@ -5,6 +5,13 @@
     <title>Title</title>
 </head>
 <body>
+<nav class="sidebar">
+    <a href="/home" class="brand">Drawings</a>
+    <a href="/gallery">Gallery</a>
+    <a href="/pub_gallery">Public Gallery</a>
+    <a href="/trash">bin</a>
+    <a href="/logout">Logout</a>
+</nav>
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
     <p>Última Versión: <span th:text="${drawing.latest_version_number()}">1</span></p>

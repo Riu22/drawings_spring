@@ -5,11 +5,23 @@
     <title>Título</title>
 </head>
 <body>
+<nav class="sidebar">
+    <a href="/home" class="brand">Drawings</a>
+    <a href="/gallery">Gallery</a>
+    <a href="/pub_gallery">Public Gallery</a>
+    <a href="/trash">bin</a>
+    <a href="/logout">Logout</a>
+</nav>
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
     <p>Última Versión: <span th:text="${drawing.latest_version_number()}">1</span></p>
 
     <a th:href="@{/draw/{id}(id=${drawing.id()})}" style="padding: 8px; border: 1px solid blue; text-decoration: none;">Ver Dibujo</a>
+    <a th:href="@{/gallery/trash/{id}(id=${drawing.id()})}"
+       onclick="return confirm('¿Está seguro de que desea enviar este dibujo a la papelera?');"
+       style="color: orange; margin-left: 10px;">
+        Papelera
+    </a>
 </div>
 <p>hola </p>
 </body>

@@ -5,9 +5,26 @@
     <title>Title</title>
 </head>
 <body>
+<nav class="sidebar">
+    <a href="/home" class="brand">Drawings</a>
+    <a href="/gallery">Gallery</a>
+    <a href="/pub_gallery">Public Gallery</a>
+    <a href="/trash">bin</a>
+    <a href="/logout">Logout</a>
+</nav>
 <div th:each="drawing : ${trashed_draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
     <p>Última Versión: <span th:text="${username}">1</span></p>
+    <a th:href="@{/trash/delete/{id}(id=${drawing.id()})}"
+       onclick="return confirm('¿Estás seguro de que quieres eliminar este dibujo permanentemente? Esta acción no se puede deshacer.');"
+       style="color: red; margin-left: 20px;">
+        Eliminar Permanentemente
+    </a>
+    <a th:href="@{/trash/rescue/{id}(id=${drawing.id()})}"
+       style="color: green; margin-left: 20px;">
+        Restaurar Dibujo
+    </a>
 </div>
+
 </body>
 </html>

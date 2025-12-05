@@ -142,4 +142,19 @@ public class draw_dao {
         String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ? AND in_trash = TRUE";
         return jdbcTemplate.query(sql, drawRowMapper(), user_id);
     }
+
+    public int delete_draw_by_id(int draw_id) {
+        String sql = "DELETE FROM draw WHERE id = ?";
+        return jdbcTemplate.update(sql, draw_id);
+    }
+
+    public int update_draw_to_trashed(int draw_id, int user_id) {
+        String sql = "UPDATE draw SET in_trash = TRUE WHERE id = ? AND user_id = ?";
+        return jdbcTemplate.update(sql, draw_id, user_id);
+    }
+
+    public int rescue_draw_from_trash(int draw_id, int user_id) {
+        String sql = "UPDATE draw SET in_trash = FALSE WHERE id = ? AND user_id = ?";
+        return jdbcTemplate.update(sql, draw_id, user_id);
+    }
 }

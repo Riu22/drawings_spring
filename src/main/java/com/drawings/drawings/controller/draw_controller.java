@@ -3,10 +3,7 @@ package com.drawings.drawings.controller;
 import com.drawings.drawings.records.draw_request;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.records.gallery_record;
-import com.drawings.drawings.service.gallery_service;
-import com.drawings.drawings.service.load_service;
-import com.drawings.drawings.service.public_service;
-import com.drawings.drawings.service.save_service;
+import com.drawings.drawings.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -32,6 +29,8 @@ public class draw_controller {
     public_service public_service;
     @Autowired
     load_service load_service;
+    @Autowired
+    private trash_service trash_service;
 
     @GetMapping("/home")
     public String drawing(HttpSession session, Model model){
@@ -71,6 +70,28 @@ public class draw_controller {
         List<gallery_record> draw=gallery_service.select_owners_draw_details(owner_id);
         model.addAttribute("draws",draw);
         return "gallery";
+    }
+
+    @GetMapping("/gallery/trash/{drawId}")
+    public String move_to_trash(@PathVariable("drawId") int draw_id, HttpSession session) {
+
+        String username = (String) session.getAttribute("username");
+
+        try {
+            int user_id = save_service.iduser(username);
+
+            boolean success = trash_service.move_to_trash(draw_id, user_id);
+
+            if (success) {
+                return "redirect:/gallery?message=Dibujo enviado a la papelera.";
+            } else {
+                return "redirect:/gallery?error=Acceso denegado o dibujo no encontrado.";
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al mover a papelera: " + e.getMessage());
+            return "redirect:/gallery?error=Error interno al mover a papelera.";
+        }
     }
 
     @GetMapping("/pub_gallery")
