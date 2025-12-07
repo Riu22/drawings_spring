@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Gallery</title>
 </head>
 <body>
 <nav class="sidebar">
@@ -12,11 +12,57 @@
     <a href="/trash">bin</a>
     <a href="/logout">Logout</a>
 </nav>
+
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
-    <p>Última Versión: <span th:text="${drawing.latest_version_number()}">1</span></p>
-    <p th:text="${drawing.draw_content()}"></p>
-    galerypub
+    <p>
+        Última Versión: <span th:text="${drawing.latest_version_number()}">1</span>
+        <a th:href="@{/draw/{id}/versions(id=${drawing.id()})}" style="margin-left: 10px; font-size: 0.9em;">
+            (Ver todas las versiones)
+        </a>
+    </p>
+
+    <a th:href="@{/view/{id}(id=${drawing.id()})}">Ver Dibujo</a>
+
+    <button th:onclick="'cloneLatestVersion(event, ' + ${drawing.id()} + ')'"
+            style="padding: 8px; border: 1px solid #e67e22; background-color: #e67e22; color: white; cursor: pointer; border-radius: 3px;">
+        Crear copia
+    </button>
 </div>
+
+<script>
+    function cloneLatestVersion(event, drawId) {
+        event.preventDefault();
+
+        const title = prompt('Introduce un título para la copia del dibujo (opcional):');
+
+        // Si el usuario cancela el prompt, no hacer nada
+        if (title === null) {
+            return;
+        }
+
+        // Obtener el número de la última versión del dibujo
+        // En la galería siempre mostramos la última versión
+        const versionElement = event.target.closest('div').querySelector('span');
+        const versionNumber = versionElement ? parseInt(versionElement.textContent) : 1;
+
+        // Crear un formulario para enviar la solicitud POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/draw/${drawId}/version/${versionNumber}/clone`;
+
+        // Si se proporcionó un título, añadirlo
+        if (title && title.trim() !== '') {
+            const titleInput = document.createElement('input');
+            titleInput.type = 'hidden';
+            titleInput.name = 'title';
+            titleInput.value = title.trim();
+            form.appendChild(titleInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
 </body>
 </html>

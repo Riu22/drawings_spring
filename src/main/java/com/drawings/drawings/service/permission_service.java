@@ -4,10 +4,12 @@ package com.drawings.drawings.service;
 
 import com.drawings.drawings.dao.draw_dao; // O el DAO donde pusiste los métodos
 import com.drawings.drawings.dao.user_dao; // Asumiendo que tienes un DAO para buscar usuarios
+import com.drawings.drawings.model.permissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class permission_service {
@@ -42,5 +44,14 @@ public class permission_service {
         }
 
         return draw_dao.get_can_write_permission(drawId, userId);
+    }
+    public boolean canUserRead(int drawId, int userId) {
+        if (draw_dao.is_owner(drawId, userId)) {
+            return true;
+        }
+
+        Optional<permissions> perms = draw_dao.get_permissions_for_user(drawId, userId);
+
+        return perms.isPresent() && (perms.get().isCan_read() || perms.get().isCan_write());
     }
 }

@@ -5,8 +5,7 @@ import com.drawings.drawings.records.draw_request;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.records.gallery_record;
 import com.drawings.drawings.service.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.drawings.drawings.model.version;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -211,4 +210,207 @@ public class draw_controller {
             return "redirect:/error?message=Error interno al cargar el dibujo";
         }
     }
+// Añade estos métodos a tu draw_controller
+
+    /**
+     * Muestra la lista de versiones de un dibujo
+     */
+    @GetMapping("/draw/{drawId}/versions")
+    public String showVersions(@PathVariable("drawId") int drawId,
+                               HttpSession session,
+                               Model model) {
+
+        String username = (String) session.getAttribute("username");
+
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            int userId = save_service.iduser(username);
+
+            // Verificar que el dibujo existe y el usuario tiene acceso
+            Optional<draw> drawOptional = load_service.get_draw_metadata(drawId);
+
+            if (drawOptional.isEmpty()) {
+                return "redirect:/error?message=Dibujo no encontrado";
+            }
+
+            draw drawMetadata = drawOptional.get();
+
+            // Verificar permisos (debe poder leer o ser público)
+            boolean canView = drawMetadata.isPublic() ||
+                    drawMetadata.getUser_id() == userId ||
+                    permission_service.canUserRead(drawId, userId);
+
+            if (!canView) {
+                return "redirect:/error?message=Acceso denegado";
+            }
+
+            // Obtener todas las versiones
+            List<version> versions = load_service.get_all_versions(drawId);
+
+            model.addAttribute("drawId", drawId);
+            model.addAttribute("drawTitle", drawMetadata.getTitle());
+            model.addAttribute("versions", versions);
+            model.addAttribute("username", username);
+
+            return "versions"; // Nueva vista para mostrar versiones
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar versiones: " + e.getMessage());
+            return "redirect:/error?message=Error al cargar versiones";
+        }
+    }
+
+    /**
+     * Muestra una versión específica de un dibujo (solo lectura)
+     */
+    @GetMapping("/view/{drawId}/version/{versionNumber}")
+    public String viewSpecificVersion(@PathVariable("drawId") int drawId,
+                                      @PathVariable("versionNumber") int versionNumber,
+                                      HttpSession session,
+                                      Model model) {
+
+        String username = (String) session.getAttribute("username");
+
+        try {
+            int userId = save_service.iduser(username);
+
+            Optional<draw> drawOptional = load_service.get_draw_metadata(drawId);
+
+            if (drawOptional.isEmpty()) {
+                return "redirect:/error?message=Dibujo no encontrado";
+            }
+
+            draw drawMetadata = drawOptional.get();
+
+            // Verificar permisos
+            if (!drawMetadata.isPublic() && drawMetadata.getUser_id() != userId) {
+                return "redirect:/error?message=Acceso denegado al dibujo";
+            }
+
+            // Cargar contenido de la versión específica
+            Optional<String> contentOptional = load_service.load_draw_content_by_version(drawId, versionNumber);
+            String drawContent = contentOptional.orElse("[]");
+
+            model.addAttribute("drawId", drawId);
+            model.addAttribute("drawContentJson", drawContent);
+            model.addAttribute("drawTitle", drawMetadata.getTitle() + " (Versión " + versionNumber + ")");
+            model.addAttribute("versionNumber", versionNumber);
+            model.addAttribute("username", username);
+
+            return "viewdraw"; // Reutiliza la vista existente
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar versión específica: " + e.getMessage());
+            return "redirect:/error?message=Error al cargar la versión";
+        }
+    }
+
+    /**
+     * Edita una versión específica de un dibujo
+     */
+    @GetMapping("/draw/{drawId}/version/{versionNumber}")
+    public String editSpecificVersion(@PathVariable("drawId") int drawId,
+                                      @PathVariable("versionNumber") int versionNumber,
+                                      HttpSession session,
+                                      Model model) {
+
+        String username = (String) session.getAttribute("username");
+        model.addAttribute("username", username);
+
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            int loggedUserId = save_service.iduser(username);
+
+            Optional<draw> drawMetadata = load_service.get_draw_metadata(drawId);
+
+            if (drawMetadata.isEmpty()) {
+                return "redirect:/error?message=Dibujo no encontrado.";
+            }
+
+            draw currentDraw = drawMetadata.get();
+
+            // Verificar permisos de escritura
+            boolean canEdit = permission_service.canUserWrite(drawId, loggedUserId);
+
+            if (!canEdit) {
+                return "redirect:/error?message=Acceso denegado. No tienes permisos de edición.";
+            }
+
+            // Cargar contenido de la versión específica
+            Optional<String> drawContentOptional = load_service.load_draw_content_by_version(drawId, versionNumber);
+            String drawContent = drawContentOptional.orElse("[]");
+
+            // Añadir datos al modelo para la edición
+            model.addAttribute("drawId", drawId);
+            model.addAttribute("drawTitle", currentDraw.getTitle());
+            model.addAttribute("isPublic", currentDraw.isPublic());
+            model.addAttribute("initialDrawContent", drawContent);
+            model.addAttribute("canEdit", true);
+            model.addAttribute("editingVersion", versionNumber); // Indicador de que se está editando una versión antigua
+
+            return "drawing";
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar la versión para edición: " + e.getMessage());
+            return "redirect:/error?message=Fallo al cargar la versión para edición.";
+        }
+    }
+
+    /**
+     * Clona una versión específica creando un nuevo dibujo independiente
+     */
+    @PostMapping("/draw/{drawId}/version/{versionNumber}/clone")
+    public String cloneVersion(@PathVariable("drawId") int drawId,
+                               @PathVariable("versionNumber") int versionNumber,
+                               @RequestParam(value = "title", required = false) String newTitle,
+                               HttpSession session) {
+
+        String username = (String) session.getAttribute("username");
+
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            int userId = save_service.iduser(username);
+
+            // Verificar que el usuario tiene acceso de lectura al dibujo original
+            Optional<draw> drawOptional = load_service.get_draw_metadata(drawId);
+
+            if (drawOptional.isEmpty()) {
+                return "redirect:/error?message=Dibujo no encontrado";
+            }
+
+            draw originalDraw = drawOptional.get();
+
+            // Verificar permisos de lectura
+            boolean canRead = originalDraw.isPublic() ||
+                    originalDraw.getUser_id() == userId ||
+                    permission_service.canUserRead(drawId, userId);
+
+            if (!canRead) {
+                return "redirect:/error?message=Acceso denegado. No puedes copiar este dibujo.";
+            }
+
+            // Clonar el dibujo desde la versión específica
+            draw clonedDraw = save_service.clone_draw_from_version(drawId, versionNumber, userId, newTitle);
+
+            // Redirigir al editor del nuevo dibujo
+            return "redirect:/draw/" + clonedDraw.getId() + "?message=Dibujo clonado con éxito";
+
+        } catch (NoSuchElementException e) {
+            System.err.println("Error al clonar: " + e.getMessage());
+            return "redirect:/error?message=" + e.getMessage();
+        } catch (Exception e) {
+            System.err.println("Error al clonar versión: " + e.getMessage());
+            return "redirect:/error?message=Error al crear la copia del dibujo";
+        }
+    }
+
 }

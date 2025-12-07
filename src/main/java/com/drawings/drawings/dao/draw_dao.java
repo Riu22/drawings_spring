@@ -247,4 +247,22 @@ public class draw_dao {
         String sql = "UPDATE draw SET title = ?, ispublic = ? WHERE id = ?";
         return jdbcTemplate.update(sql, title, ispublic, draw_id);
     }
+
+    public List<version> select_all_versions_by_draw_id(int draw_id) {
+        String sql = "SELECT id, draw_id, version_number, created_at FROM version WHERE draw_id = ? ORDER BY version_number DESC";
+        return jdbcTemplate.query(sql, versionRowMapper(), draw_id);
+    }
+
+    /**
+     * Obtiene una versión específica por su número
+     */
+    public Optional<version> select_version_by_number(int draw_id, int version_number) {
+        String sql = "SELECT id, draw_id, version_number, created_at FROM version WHERE draw_id = ? AND version_number = ?";
+        try {
+            version result = jdbcTemplate.queryForObject(sql, versionRowMapper(), draw_id, version_number);
+            return Optional.ofNullable(result);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 }

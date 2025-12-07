@@ -18,6 +18,15 @@
     </nav>
 
     <main class="main-content">
+        <!-- Aviso de edición de versión antigua -->
+        <div th:if="${editingVersion != null}" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 10px 20px; border-radius: 5px;">
+            <strong>⚠️ Editando desde la versión <span th:text="${editingVersion}">X</span></strong>
+            <p style="margin: 5px 0 0 0; font-size: 0.9em;">
+                Al guardar, se creará una nueva versión basada en esta versión anterior.
+                Los cambios realizados después de esta versión se mantendrán en el historial.
+            </p>
+        </div>
+
         <div class="main-container">
             <div class="canvas-container">
                 <canvas id="drawingCanvas"></canvas>
@@ -50,7 +59,8 @@
         drawTitle: /*[[${drawTitle}]]*/ 'Nuevo Dibujo',
         isPublic: /*[[${isPublic}]]*/ false,
         initialDrawContent: /*[[${initialDrawContent}]]*/ '[]',
-        canEdit: /*[[${canEdit}]]*/ true
+        canEdit: /*[[${canEdit}]]*/ true,
+        editingVersion: /*[[${editingVersion}]]*/ null
     };
     /*]]>*/
 </script>
