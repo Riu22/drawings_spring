@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Versiones - ' + ${drawTitle}">Versiones del Dibujo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .version-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+            transition: background-color 0.2s;
+        }
+        .version-item:hover {
+            background-color: #f0f0f0;
+        }
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .version-number {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .version-date {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .version-actions {
+            margin-top: 10px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-right: 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        .btn-view {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-edit {
+            background-color: #9b59b6;
+            color: white;
+        }
+        .btn-clone {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-latest {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .latest-badge {
+            background-color: #2ecc71;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/gallery" class="back-link">← Volver a la galería</a>
+
+    <h1 th:text="${drawTitle}">Título del Dibujo</h1>
+    <p style="color: #7f8c8d; margin-bottom: 30px;">
+        Total de versiones: <span th:text="${#lists.size(versions)}">0</span>
+    </p>
+
+    <div th:if="${#lists.isEmpty(versions)}" style="text-align: center; padding: 40px; color: #7f8c8d;">
+        <p>No hay versiones disponibles para este dibujo.</p>
+    </div>
+
+    <div th:each="version, iterStat : ${versions}" class="version-item">
+        <div class="version-header">
+            <div>
+                <span class="version-number">Versión <span th:text="${version.version_number}">1</span></span>
+                <span th:if="${iterStat.first}" class="latest-badge">ÚLTIMA</span>
+            </div>
+            <div class="version-date" th:text="${#dates.format(version.created_at, 'dd/MM/yyyy HH:mm')}">
+                01/01/2024 12:00
+            </div>
+        </div>
+
+        <div class="version-actions">
+            <a th:href="@{/view/{drawId}/version/{versionNum}(drawId=${drawId}, versionNum=${version.version_number})}"
+               class="btn btn-view">
+                Ver esta versión
+            </a>
+
+            <a th:href="@{/draw/{drawId}/version/{versionNum}(drawId=${drawId}, versionNum=${version.version_number})}"
+               class="btn btn-edit">
+                Editar desde esta versión
+            </a>
+
+            <button class="btn btn-clone"
+                    th:onclick="'cloneVersion(' + ${drawId} + ', ' + ${version.version_number} + ')'">
+                Crear copia
+            </button>
+
+            <span th:if="${iterStat.first}" style="color: #2ecc71; font-size: 0.9em;">
+                    Esta es la versión más reciente
+                </span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cloneVersion(drawId, versionNumber) {
+        const title = prompt('Introduce un título para la copia del dibujo (opcional):');
+
+        // Si el usuario cancela el prompt, no hacer nada
+        if (title === null) {
+            return;
+        }
+
+        // Crear un formulario para enviar la solicitud POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/draw/${drawId}/version/${versionNumber}/clone`;
+
+        // Si se proporcionó un título, añadirlo
+        if (title && title.trim() !== '') {
+            const titleInput = document.createElement('input');
+            titleInput.type = 'hidden';
+            titleInput.name = 'title';
+            titleInput.value = title.trim();
+            form.appendChild(titleInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+</body>
+</html>
