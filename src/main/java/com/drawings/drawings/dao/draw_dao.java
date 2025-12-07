@@ -238,4 +238,13 @@ public class draw_dao {
 
         return jdbcTemplate.query(sql, drawRowMapper(), userId, userId);
     }
+
+
+    /**
+     * Actualiza el título y el estado público de un dibujo existente
+     */
+    public int update_draw_metadata(int draw_id, String title, boolean ispublic) {
+        String sql = "UPDATE draw SET title = ?, ispublic = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, title, ispublic, draw_id);
+    }
 }
