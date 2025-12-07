@@ -1,5 +1,6 @@
 package com.drawings.drawings.controller;
 
+import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.records.draw_request;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.records.gallery_record;
@@ -10,10 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -30,44 +28,119 @@ public class draw_controller {
     @Autowired
     load_service load_service;
     @Autowired
-    private trash_service trash_service;
+    trash_service trash_service;
+    @Autowired
+    permission_service permission_service;
 
-    @GetMapping("/home")
-    public String drawing(HttpSession session, Model model){
+    @GetMapping({"/draw/new", "/draw/{id}"})
+    public String editDrawing(@PathVariable("id") Optional<Integer> drawIdOptional,
+                              HttpSession session,
+                              Model model) {
+
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
+
+        // Si no está autenticado, redirigir al login
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        // Obtener el ID del usuario logueado
+        int loggedUserId;
+        try {
+            loggedUserId = save_service.iduser(username);
+        } catch (NoSuchElementException e) {
+            // Esto debería ser manejado por un Interceptor, pero es una buena guardia
+            return "redirect:/login";
+        }
+
+        model.addAttribute("drawId", null);
+        model.addAttribute("drawTitle", "Nuevo Dibujo");
+        model.addAttribute("isPublic", false);
+        model.addAttribute("initialDrawContent", "{}");
+        model.addAttribute("canEdit", true);
+
+        // --- Lógica de Carga y Permisos ---
+
+        if (drawIdOptional.isPresent()) {
+            int drawId = drawIdOptional.get();
+
+            try {
+                Optional<draw> drawMetadata = load_service.get_draw_metadata(drawId);
+
+                if (drawMetadata.isEmpty()) {
+                    return "redirect:/error?message=Dibujo no encontrado.";
+                }
+
+                draw currentDraw = drawMetadata.get();
+
+                // 1. Verificar si el usuario puede escribir (dueño o colaborador con can_write)
+                boolean canEdit = permission_service.canUserWrite(drawId, loggedUserId);
+
+                if (!canEdit) {
+                    // Si no puede editar, se le niega el acceso a la interfaz de edición
+                    return "redirect:/error?message=Acceso denegado. No tienes permisos de edición.";
+                    // Alternativamente, podrías redirigir a la vista de solo lectura:
+                    // return "redirect:/view/" + drawId;
+                }
+
+                // 2. Cargar el contenido de la última versión usando load_draw_content
+                Optional<String> drawContentOptional = load_service.load_draw_content(drawId);
+                String drawContent = drawContentOptional.orElse("{}");
+
+                // 3. Añadir datos al modelo para la edición
+                model.addAttribute("drawId", drawId);
+                model.addAttribute("drawTitle", currentDraw.getTitle());
+                model.addAttribute("isPublic", currentDraw.isPublic());
+                model.addAttribute("initialDrawContent", drawContent);
+                model.addAttribute("canEdit", true); // Confirmamos que puede editar
+
+            } catch (Exception e) {
+                System.err.println("Error al cargar el dibujo para edición: " + e.getMessage());
+                return "redirect:/error?message=Fallo al cargar el dibujo para edición.";
+            }
+        } else {
+            // ⭐ Modo CREACIÓN (/draw/new)
+        }
+
         return "drawing";
     }
 
+
     @PostMapping("/save")
-    public String saveDrawing(HttpSession session, @RequestBody draw_request draw_request, HttpServletRequest request, HttpServletResponse response) {
+    @ResponseBody
+    public String saveDrawing(HttpSession session, @RequestBody draw_request draw_request) {
 
         String author = (String) session.getAttribute("username");
-        int id_author = save_service.iduser(author);
 
         try {
-            draw saved_draw = save_service.save_draw(
+            int id_author = save_service.iduser(author);
+
+            draw saved_draw = save_service.save_or_update_draw(
+                    draw_request.draw_id(),
                     draw_request.title(),
                     draw_request.ispublic(),
                     id_author,
                     draw_request.draw_content()
             );
 
-            return "redirect:/login";
+            return String.valueOf(saved_draw.getId());
 
         } catch (NoSuchElementException e) {
             System.err.println("Error al guardar el dibujo: " + e.getMessage());
-            return "redirect:/error?message=Datos Inválidos";
+            return "ERROR_INVALID_DATA";
         } catch (Exception e) {
-            System.err.println("Error interno del servidor: " + e.getMessage());
-            return "redirect:/error?message=Fallo al guardar el dibujo";
+            System.err.println("Error interno del servidor al guardar: " + e.getMessage());
+            return "ERROR_SERVER_FAILURE";
         }
     }
 
     @GetMapping("/gallery")
     public String gallery(Model model,HttpSession session){
-        int owner_id = save_service.iduser((String) session.getAttribute("username"));
-        List<gallery_record> draw=gallery_service.select_owners_draw_details(owner_id);
+        int username = save_service.iduser((String) session.getAttribute("username"));
+        int logged_user_id = save_service.iduser((String) session.getAttribute("username"));
+        List<gallery_record> draw=gallery_service.select_owners_draw_details(username);
+        model.addAttribute("logged_user_id", logged_user_id);
         model.addAttribute("draws",draw);
         return "gallery";
     }
@@ -101,7 +174,7 @@ public class draw_controller {
         return "gallerypub";
     }
 
-    @GetMapping("/draw/{drawId}")
+    @GetMapping("/view/{drawId}")
     public String load_draw(@PathVariable("drawId") int draw_id, Model model, HttpSession session){
 
         String username = (String) session.getAttribute("username");

@@ -45,7 +45,8 @@ public class public_service {
                     d.getCreated_at(),
                     d.isPublic(),
                     version_number,
-                    draw_content
+                    draw_content,
+                    false
             );
 
             gallery_items.add(item);

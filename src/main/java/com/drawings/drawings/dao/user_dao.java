@@ -52,4 +52,13 @@ public class user_dao {
             return null;
         }
     }
+    public int iduser(String username) throws EmptyResultDataAccessException {
+        String sql = "SELECT id FROM users WHERE username = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, username);
+    }
+    public boolean exists_by_username(String username) {
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);
+        return count != null && count > 0;
+    }
 }

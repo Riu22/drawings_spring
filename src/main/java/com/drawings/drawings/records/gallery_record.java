@@ -9,7 +9,8 @@ public record gallery_record(
         Timestamp created_at,
         boolean is_public,
         int latest_version_number,
-        String draw_content
+        String draw_content,
+        boolean can_edit
 ) {
 
 }

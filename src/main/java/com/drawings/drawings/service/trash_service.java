@@ -31,8 +31,9 @@ public class trash_service {
                     d.getCreated_at(),
                     d.isPublic(),
                     0,
-                    ""
-            );
+                    "",
+                    true
+                    );
 
             gallery_items.add(item);
         }

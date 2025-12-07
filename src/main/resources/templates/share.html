@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Compartir: ' + ${drawTitle}"></title>
+</head>
+<body>
+<h2 th:text="'Compartir Dibujo: ' + ${drawTitle}"></h2>
+
+<div class="permission-form">
+    <input type="hidden" id="drawId" th:value="${drawId}">
+
+    <label for="collaboratorUsername">Nombre de Usuario del Colaborador:</label>
+    <input type="text" id="collaboratorUsername" required>
+
+    <label>Permisos:</label>
+    <input type="checkbox" id="canReadCheckbox">
+    <label for="canReadCheckbox">Visualizar (Leer)</label><br>
+
+    <input type="checkbox" id="canWriteCheckbox">
+    <label for="canWriteCheckbox">Editar (Escribir)</label><br>
+
+    <button id="grantPermissionsBtn">Asignar Permisos</button>
+</div>
+
+<p id="messageArea" style="margin-top: 10px; font-weight: bold;"></p>
+
+<script th:inline="javascript">
+    // permission_manager.js
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const drawIdInput = document.getElementById('drawId');
+        const usernameInput = document.getElementById('collaboratorUsername');
+        const canReadCheckbox = document.getElementById('canReadCheckbox');
+        const canWriteCheckbox = document.getElementById('canWriteCheckbox');
+        const grantButton = document.getElementById('grantPermissionsBtn');
+        const messageArea = document.getElementById('messageArea');
+
+        if (!drawIdInput || !grantButton) return; // Asegurar que los elementos existen
+
+        grantButton.addEventListener('click', async () => {
+
+            const collaboratorUsername = usernameInput.value.trim();
+            const draw_id = parseInt(drawIdInput.value);
+            const can_read = canReadCheckbox.checked;
+            const can_write = canWriteCheckbox.checked;
+
+            messageArea.textContent = 'Procesando...';
+            messageArea.style.color = 'blue';
+
+            if (!collaboratorUsername) {
+                messageArea.textContent = 'Por favor, introduce el nombre de usuario del colaborador.';
+                messageArea.style.color = 'red';
+                return;
+            }
+
+            const dataToSend = {
+                draw_id: draw_id,
+                collaborator_username: collaboratorUsername,
+                can_read: can_read,
+                can_write: can_write
+            };
+
+            try {
+                const response = await fetch('/grant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSend),
+                });
+
+                const result = await response.text();
+
+                if (result === "SUCCESS") {
+                    messageArea.textContent = `Permisos asignados con éxito a ${collaboratorUsername}.`;
+                    messageArea.style.color = 'green';
+                    // Opcional: limpiar el formulario
+                    usernameInput.value = '';
+                    canReadCheckbox.checked = false;
+                    canWriteCheckbox.checked = false;
+                } else {
+                    // Manejar los errores devueltos por el controlador
+                    handleError(result);
+                }
+
+            } catch (error) {
+                messageArea.textContent = 'Error de conexión con el servidor.';
+                messageArea.style.color = 'red';
+                console.error('Error en fetch:', error);
+            }
+        });
+
+        function handleError(errorCode) {
+            let message = 'Error desconocido al asignar permisos.';
+            messageArea.style.color = 'red';
+
+            switch (errorCode) {
+                case 'ERROR_UNAUTHORIZED':
+                    message = 'Su sesión ha expirado. Por favor, recargue la página.';
+                    break;
+                case 'ERROR_NOT_OWNER':
+                    message = 'Error: Solo el dueño puede asignar permisos.';
+                    break;
+                case 'ERROR_USER_NOT_FOUND':
+                    message = 'Error: El usuario colaborador no existe.';
+                    break;
+                case 'ERROR_INTERNAL':
+                default:
+                    message = 'Error interno del servidor al procesar la solicitud.';
+            }
+            messageArea.textContent = message;
+        }
+    });
+</script>
+<script src="/js/permission_manager.js"></script>
+</body>
+</html>

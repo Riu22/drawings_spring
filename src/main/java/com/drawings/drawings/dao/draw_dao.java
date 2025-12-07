@@ -83,23 +83,39 @@ public class draw_dao {
         jdbcTemplate.update(sql, versionId, drawContent);
     }
 
-    public int add_version(int drawId) {
+    public int add_version(int draw_id, int version_number) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sql = "INSERT INTO version (draw_id, version_number) VALUES (?, 1)";
+        String sql = "INSERT INTO version (draw_id, version_number) VALUES (?, ?)";
 
         jdbcTemplate.update(connection -> {
             var ps = connection.prepareStatement(sql, new String[] {"id"});
-            ps.setInt(1, drawId);
+            ps.setInt(1, draw_id);
+            ps.setInt(2, version_number);
             return ps;
         }, keyHolder);
 
         return keyHolder.getKey().intValue();
     }
 
+    public int get_latest_version_number(int draw_id) {
+        String sql = "SELECT MAX(version_number) FROM version WHERE draw_id = ?";
+        Integer max_version = jdbcTemplate.queryForObject(sql, Integer.class, draw_id);
+        return max_version != null ? max_version : 0;
+    }
+
 
     public List<draw> select_owners_draws(int userId){
-        String sql ="SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ? AND in_trash = FALSE";
-        return jdbcTemplate.query(sql, drawRowMapper(), userId);
+        String sql = """
+        SELECT id, user_id, title, created_at, ispublic
+        FROM draw
+        WHERE in_trash = FALSE
+          AND id IN (
+            SELECT id FROM draw WHERE user_id = ? 
+            UNION
+            SELECT draw_id FROM permissios WHERE user_id = ? AND (can_read = TRUE OR can_write = TRUE)
+          )
+        ORDER BY created_at DESC
+        """;        return jdbcTemplate.query(sql, drawRowMapper(), userId, userId);
     }
 
 
@@ -138,7 +154,7 @@ public class draw_dao {
         }
     }
 
-    public List<com.drawings.drawings.model.draw> select_trashed_draws(int user_id) {
+    public List<draw> select_trashed_draws(int user_id) {
         String sql = "SELECT id, user_id, title, created_at, ispublic FROM draw WHERE user_id = ? AND in_trash = TRUE";
         return jdbcTemplate.query(sql, drawRowMapper(), user_id);
     }
@@ -156,5 +172,70 @@ public class draw_dao {
     public int rescue_draw_from_trash(int draw_id, int user_id) {
         String sql = "UPDATE draw SET in_trash = FALSE WHERE id = ? AND user_id = ?";
         return jdbcTemplate.update(sql, draw_id, user_id);
+    }
+
+    public void save_or_update_permissions(int draw_id, int user_id, boolean can_read, boolean can_write) {
+        String checkSql = "SELECT COUNT(*) FROM permissios WHERE draw_id = ? AND user_id = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, draw_id, user_id);
+
+        if (count > 0) {
+            String updateSql = "UPDATE permissios SET can_read = ?, can_write = ? WHERE draw_id = ? AND user_id = ?";
+            jdbcTemplate.update(updateSql, can_read, can_write, draw_id, user_id);
+        } else {
+            // INSERT: Si no existe, crea la entrada
+            String insertSql = "INSERT INTO permissios (draw_id, user_id, can_read, can_write) VALUES (?, ?, ?, ?)";
+            jdbcTemplate.update(insertSql, draw_id, user_id, can_read, can_write);
+        }
+    }
+
+    /**
+     * Elimina los permisos de un usuario sobre un dibujo (si ambos permisos son falsos).
+     */
+    public int delete_permissions(int draw_id, int user_id) {
+        String sql = "DELETE FROM permissios WHERE draw_id = ? AND user_id = ?";
+        return jdbcTemplate.update(sql, draw_id, user_id);
+    }
+
+    public Optional<permissions> get_permissions_for_user(int draw_id, int user_id) {
+        String sql = "SELECT user_id, draw_id, can_read, can_write FROM permissios WHERE draw_id = ? AND user_id = ?";
+        try {
+            permissions result = jdbcTemplate.queryForObject(sql, permissionRowMapper(), user_id, draw_id);
+            return Optional.ofNullable(result);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+    public boolean is_owner(int drawId, int userId) {
+        String sql = "SELECT COUNT(*) FROM draw WHERE id = ? AND user_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, drawId, userId);
+        return count != null && count > 0;
+    }
+
+    public boolean get_can_write_permission(int drawId, int userId) {
+        String sql = "SELECT can_write FROM permissios WHERE draw_id = ? AND user_id = ?";
+
+        try {
+            // queryForObject(String sql, Class<T> requiredType, Object... args)
+            return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, drawId, userId));
+        } catch (EmptyResultDataAccessException e) {
+            // Si no hay entrada en la tabla permissios, no tiene permiso explícito.
+            return false;
+        }
+    }
+
+    public List<draw> select_viewable_draws(int userId) {
+        String sql = """
+    SELECT DISTINCT d.id, d.user_id, d.title, d.created_at, d.ispublic
+    FROM draw d
+    LEFT JOIN permissios p ON d.id = p.draw_id AND p.user_id = ?
+    WHERE d.in_trash = FALSE
+      AND (
+        d.user_id = ?
+        OR (p.can_read = TRUE OR p.can_write = TRUE)
+      )
+    ORDER BY d.created_at DESC
+    """;
+
+        return jdbcTemplate.query(sql, drawRowMapper(), userId, userId);
     }
 }
