@@ -167,8 +167,9 @@ public class draw_controller {
     }
 
     @GetMapping("/pub_gallery")
-    public String public_gallery(Model model){
-        List<gallery_record> draw= public_service.select_public_draw_details();
+    public String public_gallery(Model model, HttpSession session){
+        int id_user = save_service.iduser((String) session.getAttribute("username"));
+        List<gallery_record> draw= public_service.select_public_draw_details(id_user);
         model.addAttribute("draws",draw);
         return "gallerypub";
     }

@@ -17,12 +17,17 @@
 
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
+    <p>Author: <span th:text="${drawing.author}">1</span></p>
     <p>
         Última Versión: <span th:text="${drawing.latest_version_number()}">1</span>
         <a th:href="@{/draw/{id}/versions(id=${drawing.id()})}" style="margin-left: 10px; font-size: 0.9em;">
             (Ver todas las versiones)
         </a>
     </p>
+    <a th:if="${drawing.can_edit()}"
+       th:href="@{/gallery/trash/{id}(id=${drawing.id()})}">
+        Papelera
+    </a>
 
     <a th:href="@{/view/{id}(id=${drawing.id()})}">Ver Dibujo</a>
 

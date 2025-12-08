@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 public record gallery_record(
         int id,
         String title,
+        String author,
         Timestamp created_at,
         boolean is_public,
         int latest_version_number,

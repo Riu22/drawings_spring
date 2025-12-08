@@ -45,6 +45,7 @@ public class permission_service {
 
         return draw_dao.get_can_write_permission(drawId, userId);
     }
+
     public boolean canUserRead(int drawId, int userId) {
         if (draw_dao.is_owner(drawId, userId)) {
             return true;

@@ -4,6 +4,7 @@ import com.drawings.drawings.model.draw;
 import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.model.permissions;
 import com.drawings.drawings.model.version;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -265,4 +266,11 @@ public class draw_dao {
             return Optional.empty();
         }
     }
+
+    public String select_autor_by_id(int user_id){
+        String sql = "SELECT username FROM users WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, user_id);
+
+    }
+
 }

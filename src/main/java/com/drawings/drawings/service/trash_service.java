@@ -18,6 +18,7 @@ public class trash_service {
 
     public List<gallery_record> get_trashed_draws(int owner_id) {
         List<draw> trashed_draws = draw_dao.select_trashed_draws(owner_id);
+        String author = draw_dao.select_autor_by_id(owner_id);
 
         if (trashed_draws.isEmpty()) {
             return new ArrayList<>();
@@ -28,6 +29,7 @@ public class trash_service {
             gallery_record item = new gallery_record(
                     d.getId(),
                     d.getTitle(),
+                    author,
                     d.getCreated_at(),
                     d.isPublic(),
                     0,

@@ -1,57 +1,71 @@
-package com.drawings.drawings.service;
+    package com.drawings.drawings.service;
 
-import com.drawings.drawings.dao.draw_dao;
-import com.drawings.drawings.model.draw;
-import com.drawings.drawings.model.draw_data;
-import com.drawings.drawings.model.version;
-import com.drawings.drawings.records.gallery_record;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
+    import com.drawings.drawings.dao.draw_dao;
+    import com.drawings.drawings.model.draw;
+    import com.drawings.drawings.model.draw_data;
+    import com.drawings.drawings.model.version;
+    import com.drawings.drawings.records.gallery_record;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Service;
+    import java.util.ArrayList;
+    import java.util.List;
 
-@Service
-public class public_service {
+    @Service
+    public class public_service {
 
-    @Autowired
-    draw_dao draw_dao;
+        @Autowired
+        draw_dao draw_dao;
+        @Autowired
+        permission_service permission_service;
 
-    public List<gallery_record> select_public_draw_details(){
 
-        List<draw> draws = draw_dao.select_public_draws();
+        public List<gallery_record> select_public_draw_details(int id_author){
 
-        List<gallery_record> gallery_items = new ArrayList<>();
+            List<draw> draws = draw_dao.select_public_draws();
 
-        for (draw d : draws) {
-            version latest_version = draw_dao.select_latest_draw_version(d.getId());
+            List<gallery_record> gallery_items = new ArrayList<>();
 
-            int version_number = 0;
-            String draw_content = "";
+            for (draw d : draws) {
+                version latest_version = draw_dao.select_latest_draw_version(d.getId());
+                String author = draw_dao.select_autor_by_id(d.getUser_id());
+                int version_number = 0;
+                String draw_content = "";
 
-            if (latest_version != null) {
-                version_number = latest_version.getVersion_number();
+                if (latest_version != null) {
+                    version_number = latest_version.getVersion_number();
 
-                draw_data data = draw_dao.select_draw_data(latest_version.getId());
+                    draw_data data = draw_dao.select_draw_data(latest_version.getId());
 
-                if (data != null && data.getDraw_content() != null) {
-                    draw_content = data.getDraw_content();
+                    if (data != null && data.getDraw_content() != null) {
+                        draw_content = data.getDraw_content();
+                    }
                 }
+                boolean can_edit = false;
+                if (author != null) {
+                    // Verificar si es el dueño
+                    if (d.getUser_id() == id_author) {
+                        can_edit = true;
+                    } else {
+                        // Si no es dueño, verificar permisos de escritura
+                        can_edit = permission_service.canUserWrite(d.getId(),id_author);
+                    }
+                }
+
+                gallery_record item = new gallery_record(
+                        d.getId(),
+                        d.getTitle(),
+                        author,
+                        d.getCreated_at(),
+                        d.isPublic(),
+                        version_number,
+                        draw_content,
+                        can_edit,
+                        d.getUser_id()
+                );
+
+                gallery_items.add(item);
             }
 
-            gallery_record item = new gallery_record(
-                    d.getId(),
-                    d.getTitle(),
-                    d.getCreated_at(),
-                    d.isPublic(),
-                    version_number,
-                    draw_content,
-                    false,
-                    d.getUser_id()
-            );
-
-            gallery_items.add(item);
+            return gallery_items;
         }
-
-        return gallery_items;
     }
-}

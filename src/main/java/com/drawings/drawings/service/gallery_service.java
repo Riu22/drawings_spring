@@ -22,9 +22,10 @@ public class gallery_service {
         this.permission_service = permission_service;
     }
 
-    public List<gallery_record> select_owners_draw_details(int userId){
+    public List<gallery_record> select_owners_draw_details(int user_id){
 
-        List<draw> draws = draw_dao.select_viewable_draws(userId);
+        List<draw> draws = draw_dao.select_viewable_draws(user_id);
+        String author = draw_dao.select_autor_by_id(user_id);
         List<gallery_record> gallery_items = new ArrayList<>();
 
         for (draw d : draws) {
@@ -44,22 +45,23 @@ public class gallery_service {
             }
 
             // Cálculo de Permiso de Edición (can_edit)
-            boolean isOwner = d.getUser_id() == userId;
+            boolean isOwner = d.getUser_id() == user_id;
             boolean canEdit = isOwner;
 
             if (!isOwner) {
-                canEdit = permission_service.canUserWrite(d.getId(), userId);
+                canEdit = permission_service.canUserWrite(d.getId(), user_id);
             }
 
             gallery_record item = new gallery_record(
                     d.getId(),
                     d.getTitle(),
+                    author,
                     d.getCreated_at(),
                     d.isPublic(),
                     version_number,
                     draw_content,
                     canEdit,
-                    d.getUser_id()  // ID del dueño del dibujo
+                    d.getUser_id()
             );
 
             gallery_items.add(item);
