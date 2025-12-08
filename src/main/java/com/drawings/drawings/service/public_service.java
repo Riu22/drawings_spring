@@ -47,7 +47,7 @@
                         can_edit = true;
                     } else {
                         // Si no es dueño, verificar permisos de escritura
-                        can_edit = permission_service.canUserWrite(d.getId(),id_author);
+                        can_edit = permission_service.can_user_write(d.getId(),id_author);
                     }
                 }
 

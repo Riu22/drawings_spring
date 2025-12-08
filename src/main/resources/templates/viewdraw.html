@@ -4,20 +4,307 @@
     <meta charset="UTF-8">
     <title th:text="${drawTitle} ? 'Ver: ' + ${drawTitle} : 'Dibujo Cargado'">Lienzo de Dibujo</title>
     <style>
-        /* Estilos básicos para el lienzo */
-        #drawing_canvas {
-            border: 2px solid #333;
-            background-color: #fff;
-            display: block;
-        }
+        /* ==================================== */
+/* 1. ESTILOS BASE Y ESTRUCTURA GENERAL */
+/* ==================================== */
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: #000000;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.page-container {
+    display: flex;
+    height: 100vh;
+    flex-grow: 1;
+}
+
+/* ==================================== */
+/* 2. BARRA LATERAL (SIDEBAR) */
+/* ==================================== */
+
+.sidebar {
+    width: 200px;
+    background-color: #2a2a2a;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.sidebar .brand {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar a {
+    color: #f0f0f0;
+    text-decoration: none;
+    padding: 10px 0;
+    font-size: 1.1em;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: #3a3a3a;
+}
+
+.sidebar .user-info {
+    font-size: 0.9em;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    color: #ccc;
+}
+
+/* ==================================== */
+/* 3. CONTENIDO PRINCIPAL (MAIN CONTENT) */
+/* ==================================== */
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.draw-header {
+    margin-bottom: 15px;
+    padding: 10px 0;
+    color: #f0f0f0;
+    border-bottom: 1px solid #444;
+}
+
+.draw-header h1 {
+    margin: 0;
+    font-size: 2em;
+}
+.draw-header p {
+    margin-top: 5px;
+    font-size: 1.1em;
+    color: #ccc;
+}
+
+/* Contenedor Flex para el Canvas y el Espacio de Relleno */
+.main-container {
+    display: flex;
+    flex-grow: 1;
+    height: 100%;
+    min-height: 0; /* IMPORTANTE: Permite que flex-grow funcione correctamente */
+}
+
+/* Contenedor del Canvas */
+.canvas-container {
+    flex-grow: 1;
+    padding-right: 20px;
+    height: 100%;
+    min-height: 0; /* IMPORTANTE */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#drawing_canvas {
+    background-color: white;
+    border: 1px solid #ccc;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+/* ESPACIO DE RELLENO */
+.placeholder-space {
+    width: 200px;
+}
+
+/* ==================================== */
+/* 4. ESTILOS ORIGINALES DE CONTROLES */
+/* ==================================== */
+
+.controls-container {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.controls-container .button-link {
+    width: 100%;
+}
+
+.controls-container .button-link {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.controls-container .button-link.selected {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+#colorPicker {
+    width: 100%;
+    height: 40px;
+    padding: 5px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #333;
+    color: #f0f0f0;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.clr-field {
+    width: 100%;
+    height: 40px;
+    padding: 5px;
+    cursor: pointer;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #333;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.clr-field button {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    border: none;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #444;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 15px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    margin-top: -6px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+}
+
+input[type="range"]::-moz-range-track {
+    background: #444;
+    height: 8px;
+    border-radius: 5px;
+}
+
+.object-item {
+    padding: 8px;
+    margin: 5px 0;
+    background: white;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.object-item:hover {
+    background: #e8e8e8;
+}
+
+.object-item.selected {
+    background: #d0e8ff;
+    border: 2px solid #0066cc;
+}
+
+.object-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+}
+
+.delete-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.delete-btn:hover {
+    background: #cc0000;
+}
     </style>
 </head>
 <body>
+<div class="page-container">
+    <nav class="sidebar">
+        <a href="/draw/new" class="brand">Drawings</a>
+        <div class="user-info">
+            <span>Bienvenido, <span th:text="${username}"></span></span>
+        </div>
+        <a href="/gallery/private">Gallery</a>
+        <a href="/gallery/public">Public Gallery</a>
+        <a href="/logout">Logout</a>
+    </nav>
 
-<h1 th:text="${drawTitle}">Dibujo Cargado</h1>
-<p>Autor: <span th:text="${username}"></span></p>
+    <main class="main-content">
+        <header class="draw-header">
+            <h1 th:text="${drawTitle}">Dibujo Cargado</h1>
+            <p>Autor: <span th:text="${author}"></span></p>
+        </header>
 
-<canvas id="drawing_canvas" width="800" height="600"></canvas>
+        <div class="main-container">
+            <div class="canvas-container">
+                <canvas id="drawing_canvas"></canvas>
+            </div>
+
+            <div class="placeholder-space"></div>
+        </div>
+    </main>
+</div>
 
 <script th:inline="javascript">
 
@@ -29,24 +316,93 @@
     const ctx = canvas.getContext('2d');
     let objects = [];
 
-    // Variable que trae el JSON desde el modelo de Spring Boot/Thymeleaf.
-    // ¡Importante! Usa el nombre de la variable que usaste en el controller: 'drawContentJson'.
     const draw_content_json = [[${drawContentJson}]] || null;
 
+    // =========================================================================
+    // 2.2 Funciones de Redimensionamiento del Canvas
+    // =========================================================================
+
+    /**
+     * Calcula y establece el tamaño óptimo del canvas basado en el contenido
+     */
+    function resize_canvas() {
+        const container = canvas.parentElement;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        // Calcular el bounding box del contenido
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+
+        objects.forEach(obj => {
+            if (obj.type === 'freeDraw' && obj.points) {
+                obj.points.forEach(p => {
+                    minX = Math.min(minX, p.x);
+                    minY = Math.min(minY, p.y);
+                    maxX = Math.max(maxX, p.x);
+                    maxY = Math.max(maxY, p.y);
+                });
+            } else if (obj.type === 'circle') {
+                const radius = (obj.size || 20) / 2;
+                minX = Math.min(minX, obj.x - radius);
+                minY = Math.min(minY, obj.y - radius);
+                maxX = Math.max(maxX, obj.x + radius);
+                maxY = Math.max(maxY, obj.y + radius);
+            } else if (obj.type === 'square') {
+                const half = (obj.size || 40) / 2;
+                minX = Math.min(minX, obj.x - half);
+                minY = Math.min(minY, obj.y - half);
+                maxX = Math.max(maxX, obj.x + half);
+                maxY = Math.max(maxY, obj.y + half);
+            }
+        });
+
+        // Si no hay objetos, usar tamaño por defecto
+        if (objects.length === 0 || !isFinite(minX)) {
+            canvas.width = 800;
+            canvas.height = 600;
+            return;
+        }
+
+        // Añadir padding
+        const padding = 20;
+        const contentWidth = maxX - minX + (padding * 2);
+        const contentHeight = maxY - minY + (padding * 2);
+
+        // Calcular escala para que quepa en el contenedor
+        const scaleX = containerWidth / contentWidth;
+        const scaleY = containerHeight / contentHeight;
+        const scale = Math.min(scaleX, scaleY, 1); // No escalar más grande que el original
+
+        // Establecer tamaño del canvas
+        canvas.width = contentWidth * scale;
+        canvas.height = contentHeight * scale;
+
+        // Guardar la escala y offset para el dibujo
+        canvas.dataset.scale = scale;
+        canvas.dataset.offsetX = minX - padding;
+        canvas.dataset.offsetY = minY - padding;
+    }
 
     // =========================================================================
-    // 2.2 Funciones de Dibujo
+    // 2.3 Funciones de Dibujo
     // =========================================================================
 
     /**
      * Dibuja un único objeto (forma o trazo) en el Canvas.
      */
     function draw_object(obj) {
+        const scale = parseFloat(canvas.dataset.scale) || 1;
+        const offsetX = parseFloat(canvas.dataset.offsetX) || 0;
+        const offsetY = parseFloat(canvas.dataset.offsetY) || 0;
+
+        ctx.save();
+        ctx.scale(scale, scale);
+        ctx.translate(-offsetX, -offsetY);
 
         ctx.fillStyle = obj.color;
         ctx.strokeStyle = obj.color;
 
-        // Lógica para el TRAZO LIBRE (freeDraw)
         if (obj.type === 'freeDraw') {
             if (obj.points && obj.points.length > 0) {
                 ctx.lineWidth = obj.size || 5;
@@ -62,19 +418,18 @@
                 ctx.stroke();
             }
 
-        // Lógica para CÍRCULOS (circle)
         } else if (obj.type === 'circle') {
             const radius = (obj.size || 20) / 2;
             ctx.beginPath();
             ctx.arc(obj.x, obj.y, radius, 0, Math.PI * 2);
             ctx.fill();
 
-        // Lógica para CUADRADOS (square)
         } else if (obj.type === 'square') {
             const half_size = (obj.size || 40) / 2;
             ctx.fillRect(obj.x - half_size, obj.y - half_size, obj.size, obj.size);
         }
-        // ... Añadir lógica para otros tipos de formas ...
+
+        ctx.restore();
     }
 
     /**
@@ -88,7 +443,7 @@
     }
 
     // =========================================================================
-    // 2.3 Función de Carga
+    // 2.4 Función de Carga
     // =========================================================================
 
     /**
@@ -97,21 +452,21 @@
     function load_drawing(json_string) {
         console.log("Intentando cargar JSON...");
         try {
-            // Analizar la cadena JSON
             const loaded_objects = JSON.parse(json_string);
-
-            // Reemplazar la lista global con los objetos cargados
             objects = loaded_objects;
 
-            // Pintar el Canvas
+            // Primero redimensionar el canvas según el contenido
+            resize_canvas();
+
+            // Luego dibujar
             redraw_canvas();
 
             console.log(`Dibujo cargado. ${objects.length} objetos dibujados.`);
 
         } catch (e) {
-            console.error("Error al analizar el JSON. El formato puede ser incorrecto:", e);
-            // Si el JSON es inválido o el parseo falla, inicializa un lienzo vacío
+            console.error("Error al analizar el JSON:", e);
             objects = [];
+            resize_canvas();
             redraw_canvas();
         }
     }
@@ -121,12 +476,20 @@
     // =========================================================================
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Verificar si el servidor envió contenido JSON y no es solo el array vacío "[]"
         if (draw_content_json && draw_content_json.length > 2) {
             load_drawing(draw_content_json);
         } else {
-            console.log("No hay contenido de dibujo para cargar. El lienzo está vacío.");
+            console.log("No hay contenido de dibujo para cargar.");
+            resize_canvas();
         }
+
+        // Redimensionar cuando cambie el tamaño de la ventana
+        window.addEventListener('resize', function() {
+            if (objects.length > 0) {
+                resize_canvas();
+                redraw_canvas();
+            }
+        });
     });
 
 </script>

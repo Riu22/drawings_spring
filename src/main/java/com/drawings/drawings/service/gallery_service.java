@@ -45,11 +45,11 @@ public class gallery_service {
             }
 
             // Cálculo de Permiso de Edición (can_edit)
-            boolean isOwner = d.getUser_id() == user_id;
-            boolean canEdit = isOwner;
+            boolean is_owner = d.getUser_id() == user_id;
+            boolean can_edit = is_owner;
 
-            if (!isOwner) {
-                canEdit = permission_service.canUserWrite(d.getId(), user_id);
+            if (!is_owner) {
+                can_edit = permission_service.can_user_write(d.getId(), user_id);
             }
 
             gallery_record item = new gallery_record(
@@ -60,7 +60,7 @@ public class gallery_service {
                     d.isPublic(),
                     version_number,
                     draw_content,
-                    canEdit,
+                    can_edit,
                     d.getUser_id()
             );
 

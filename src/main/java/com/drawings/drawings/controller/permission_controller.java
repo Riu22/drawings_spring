@@ -5,9 +5,9 @@ package com.drawings.drawings.controller;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.service.load_service;
 import com.drawings.drawings.service.permission_service;
-import com.drawings.drawings.service.save_service; // Asumo que save_service tiene iduser
+import com.drawings.drawings.service.save_service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller; // ⭐ Cambiado a @Controller
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
@@ -29,15 +29,10 @@ public class permission_controller {
             boolean can_write
     ) {}
 
-    @Autowired
-    public permission_controller(permission_service permission_service, save_service save_service) {
-        this.permission_service = permission_service;
-        this.save_service = save_service;
-    }
 
     @PostMapping("/grant")
     @ResponseBody
-    public String grantPermissions(@RequestBody PermissionRequest request, HttpSession session) {
+    public String grant_permissions(@RequestBody PermissionRequest request, HttpSession session) {
 
         String username = (String) session.getAttribute("username");
 
@@ -46,10 +41,10 @@ public class permission_controller {
         }
 
         try {
-            int requesterId = save_service.iduser(username);
+            int requester_id = save_service.iduser(username);
 
             permission_service.grant_permissions(
-                    requesterId,
+                    requester_id,
                     request.draw_id(),
                     request.collaborator_username(),
                     request.can_read(),
@@ -62,7 +57,6 @@ public class permission_controller {
             System.err.println("Error: Colaborador o dueño no encontrado: " + e.getMessage());
             return "ERROR_USER_NOT_FOUND";
         } catch (IllegalArgumentException e) {
-            // El servicio lanza esta excepción si el usuario autenticado no es el dueño del dibujo
             System.err.println("Error de permisos: " + e.getMessage());
             return "ERROR_NOT_OWNER";
         } catch (Exception e) {
@@ -71,29 +65,27 @@ public class permission_controller {
         }
     }
     @GetMapping("/share/{drawId}")
-    public String shareDrawingPage(@PathVariable("drawId") int drawId,
-                                   HttpSession session,
-                                   Model model) {
+    public String share_drawing_page(@PathVariable("drawId") int draw_id,
+                                     HttpSession session,
+                                     Model model) {
 
         String username = (String) session.getAttribute("username");
 
         try {
-            int ownerId = save_service.iduser(username);
+            int owner_id = save_service.iduser(username);
 
-            // 1. Verificar la propiedad del dibujo
-            Optional<draw> drawMetadata = load_service.get_draw_metadata(drawId);
+            Optional<draw> drawMetadata = load_service.get_draw_metadata(draw_id);
 
-            if (drawMetadata.isEmpty() || drawMetadata.get().getUser_id() != ownerId) {
-                // El dibujo no existe o el usuario no es el dueño
+            if (drawMetadata.isEmpty() || drawMetadata.get().getUser_id() != owner_id) {
                 return "redirect:/gallery?error=No tiene permisos para compartir este dibujo.";
             }
 
-            draw currentDraw = drawMetadata.get();
+            draw current_draw = drawMetadata.get();
 
-            model.addAttribute("drawId", drawId);
-            model.addAttribute("drawTitle", currentDraw.getTitle());
+            model.addAttribute("drawId", draw_id);
+            model.addAttribute("drawTitle", current_draw.getTitle());
 
-            return "share"; // ⭐ Nombre de tu nueva vista Thymeleaf
+            return "share";
 
         } catch (Exception e) {
             System.err.println("Error al cargar la página de compartir: " + e.getMessage());

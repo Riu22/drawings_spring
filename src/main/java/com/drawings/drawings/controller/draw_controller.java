@@ -1,9 +1,7 @@
 package com.drawings.drawings.controller;
 
-import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.records.draw_request;
 import com.drawings.drawings.model.draw;
-import com.drawings.drawings.records.gallery_record;
 import com.drawings.drawings.service.*;
 import com.drawings.drawings.model.version;
 import jakarta.servlet.http.HttpSession;
@@ -21,13 +19,8 @@ public class draw_controller {
     @Autowired
     save_service save_service;
     @Autowired
-    gallery_service gallery_service;
-    @Autowired
-    public_service public_service;
-    @Autowired
     load_service load_service;
-    @Autowired
-    trash_service trash_service;
+
     @Autowired
     permission_service permission_service;
 
@@ -74,7 +67,7 @@ public class draw_controller {
                 draw currentDraw = drawMetadata.get();
 
                 // 1. Verificar si el usuario puede escribir (dueño o colaborador con can_write)
-                boolean canEdit = permission_service.canUserWrite(drawId, loggedUserId);
+                boolean canEdit = permission_service.can_user_write(drawId, loggedUserId);
 
                 if (!canEdit) {
                     // Si no puede editar, se le niega el acceso a la interfaz de edición
@@ -98,8 +91,6 @@ public class draw_controller {
                 System.err.println("Error al cargar el dibujo para edición: " + e.getMessage());
                 return "redirect:/error?message=Fallo al cargar el dibujo para edición.";
             }
-        } else {
-            // ⭐ Modo CREACIÓN (/draw/new)
         }
 
         return "drawing";
@@ -134,45 +125,6 @@ public class draw_controller {
         }
     }
 
-    @GetMapping("/gallery")
-    public String gallery(Model model,HttpSession session){
-        int username = save_service.iduser((String) session.getAttribute("username"));
-        int logged_user_id = save_service.iduser((String) session.getAttribute("username"));
-        List<gallery_record> draw=gallery_service.select_owners_draw_details(username);
-        model.addAttribute("logged_user_id", logged_user_id);
-        model.addAttribute("draws",draw);
-        return "gallery";
-    }
-
-    @GetMapping("/gallery/trash/{drawId}")
-    public String move_to_trash(@PathVariable("drawId") int draw_id, HttpSession session) {
-
-        String username = (String) session.getAttribute("username");
-
-        try {
-            int user_id = save_service.iduser(username);
-
-            boolean success = trash_service.move_to_trash(draw_id, user_id);
-
-            if (success) {
-                return "redirect:/gallery?message=Dibujo enviado a la papelera.";
-            } else {
-                return "redirect:/gallery?error=Acceso denegado o dibujo no encontrado.";
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error al mover a papelera: " + e.getMessage());
-            return "redirect:/gallery?error=Error interno al mover a papelera.";
-        }
-    }
-
-    @GetMapping("/pub_gallery")
-    public String public_gallery(Model model, HttpSession session){
-        int id_user = save_service.iduser((String) session.getAttribute("username"));
-        List<gallery_record> draw= public_service.select_public_draw_details(id_user);
-        model.addAttribute("draws",draw);
-        return "gallerypub";
-    }
 
     @GetMapping("/view/{drawId}")
     public String load_draw(@PathVariable("drawId") int draw_id, Model model, HttpSession session){
@@ -188,6 +140,7 @@ public class draw_controller {
             }
 
             draw draw_metadata = optional_draw.get();
+            String author = load_service.get_author(draw_metadata.getUser_id());
 
             if (!draw_metadata.isPublic() && draw_metadata.getUser_id() != owner_id) {
                 return "redirect:/error?message=Acceso denegado al dibujo";
@@ -199,7 +152,7 @@ public class draw_controller {
             model.addAttribute("drawId", draw_id);
             model.addAttribute("drawContentJson", draw_content_json);
             model.addAttribute("drawTitle", draw_metadata.getTitle());
-            model.addAttribute("username", username);
+            model.addAttribute("author", author);
 
             return "viewdraw";
 
@@ -211,7 +164,6 @@ public class draw_controller {
             return "redirect:/error?message=Error interno al cargar el dibujo";
         }
     }
-// Añade estos métodos a tu draw_controller
 
     /**
      * Muestra la lista de versiones de un dibujo
@@ -242,7 +194,7 @@ public class draw_controller {
             // Verificar permisos (debe poder leer o ser público)
             boolean canView = drawMetadata.isPublic() ||
                     drawMetadata.getUser_id() == userId ||
-                    permission_service.canUserRead(drawId, userId);
+                    permission_service.can_user_read(drawId, userId);
 
             if (!canView) {
                 return "redirect:/error?message=Acceso denegado";
@@ -337,7 +289,7 @@ public class draw_controller {
             draw currentDraw = drawMetadata.get();
 
             // Verificar permisos de escritura
-            boolean canEdit = permission_service.canUserWrite(drawId, loggedUserId);
+            boolean canEdit = permission_service.can_user_write(drawId, loggedUserId);
 
             if (!canEdit) {
                 return "redirect:/error?message=Acceso denegado. No tienes permisos de edición.";
@@ -393,7 +345,7 @@ public class draw_controller {
             // Verificar permisos de lectura
             boolean canRead = originalDraw.isPublic() ||
                     originalDraw.getUser_id() == userId ||
-                    permission_service.canUserRead(drawId, userId);
+                    permission_service.can_user_read(drawId, userId);
 
             if (!canRead) {
                 return "redirect:/error?message=Acceso denegado. No puedes copiar este dibujo.";

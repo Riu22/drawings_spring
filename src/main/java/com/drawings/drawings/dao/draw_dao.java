@@ -254,9 +254,7 @@ public class draw_dao {
         return jdbcTemplate.query(sql, versionRowMapper(), draw_id);
     }
 
-    /**
-     * Obtiene una versión específica por su número
-     */
+
     public Optional<version> select_version_by_number(int draw_id, int version_number) {
         String sql = "SELECT id, draw_id, version_number, created_at FROM version WHERE draw_id = ? AND version_number = ?";
         try {

@@ -49,7 +49,10 @@ public class DrawingsApplication implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(interceptor)
-                .addPathPatterns("/home")
-                .addPathPatterns("/gallery");
+                .addPathPatterns("/draw/**")
+                .addPathPatterns("/gallery/**")
+                .addPathPatterns("/view/**")
+                .addPathPatterns("/share/**");
+
     }
 }

@@ -1,9 +1,8 @@
 package com.drawings.drawings.controller;
 
-// ... (Otros imports) ...
-import com.drawings.drawings.records.gallery_record; // Necesario para el tipo de lista
-import com.drawings.drawings.service.trash_service; // Asumo que inyectaste este servicio
-import com.drawings.drawings.service.save_service; // Asumo que inyectaste este servicio
+import com.drawings.drawings.records.gallery_record;
+import com.drawings.drawings.service.trash_service;
+import com.drawings.drawings.service.save_service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +22,7 @@ public class trash_controller {
     @Autowired
     private trash_service trash_service;
 
-    @GetMapping("/trash")
+    @GetMapping("/gallery/trash")
     public String trash(HttpSession session, Model model) {
 
         String username = (String) session.getAttribute("username");

@@ -19,25 +19,25 @@ public class permission_service {
     @Autowired
     user_dao user_dao;
 
-    public boolean grant_permissions(int requesterId, int drawId, String collaboratorUsername, boolean canRead, boolean canWrite) throws NoSuchElementException, IllegalArgumentException {
+    public boolean grant_permissions(int requester_id, int draw_id, String collaborator_username, boolean can_read, boolean can_write) throws NoSuchElementException, IllegalArgumentException {
 
 
-        int collaboratorId = user_dao.iduser(collaboratorUsername);
+        int collaboratorId = user_dao.iduser(collaborator_username);
 
-        if (collaboratorId == requesterId) {
+        if (collaboratorId == requester_id) {
             return true;
         }
 
-        if (canRead || canWrite) {
-            draw_dao.save_or_update_permissions(drawId, collaboratorId, canRead, canWrite);
+        if (can_read || can_write) {
+            draw_dao.save_or_update_permissions(draw_id, collaboratorId, can_read, can_write);
         } else {
-            draw_dao.delete_permissions(drawId, collaboratorId);
+            draw_dao.delete_permissions(draw_id, collaboratorId);
         }
 
         return true;
     }
 
-    public boolean canUserWrite(int drawId, int userId) {
+    public boolean can_user_write(int drawId, int userId) {
 
         if (draw_dao.is_owner(drawId, userId)) {
             return true;
@@ -46,7 +46,7 @@ public class permission_service {
         return draw_dao.get_can_write_permission(drawId, userId);
     }
 
-    public boolean canUserRead(int drawId, int userId) {
+    public boolean can_user_read(int drawId, int userId) {
         if (draw_dao.is_owner(drawId, userId)) {
             return true;
         }
