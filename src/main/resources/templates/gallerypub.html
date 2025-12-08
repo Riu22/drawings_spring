@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Gallery</title>
+    <title>Public Gallery</title>
 </head>
 <body>
 <nav class="sidebar">
@@ -12,6 +12,8 @@
     <a href="/trash">bin</a>
     <a href="/logout">Logout</a>
 </nav>
+
+<h1>Galería Pública</h1>
 
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
@@ -24,14 +26,14 @@
 
     <a th:href="@{/view/{id}(id=${drawing.id()})}">Ver Dibujo</a>
 
-    <button th:onclick="'cloneLatestVersion(event, ' + ${drawing.id()} + ')'"
+    <button th:onclick="'clonePublicDrawing(event, ' + ${drawing.id()} + ')'"
             style="padding: 8px; border: 1px solid #e67e22; background-color: #e67e22; color: white; cursor: pointer; border-radius: 3px;">
         Crear copia
     </button>
 </div>
 
 <script>
-    function cloneLatestVersion(event, drawId) {
+    function clonePublicDrawing(event, drawId) {
         event.preventDefault();
 
         const title = prompt('Introduce un título para la copia del dibujo (opcional):');
@@ -42,7 +44,6 @@
         }
 
         // Obtener el número de la última versión del dibujo
-        // En la galería siempre mostramos la última versión
         const versionElement = event.target.closest('div').querySelector('span');
         const versionNumber = versionElement ? parseInt(versionElement.textContent) : 1;
 

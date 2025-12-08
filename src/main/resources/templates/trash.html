@@ -14,7 +14,7 @@
 </nav>
 <div th:each="drawing : ${trashed_draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
-    <p>Última Versión: <span th:text="${username}">1</span></p>
+    <p>Author: <span th:text="${username}">1</span></p>
     <a th:href="@{/trash/delete/{id}(id=${drawing.id()})}"
        onclick="return confirm('¿Estás seguro de que quieres eliminar este dibujo permanentemente? Esta acción no se puede deshacer.');"
        style="color: red; margin-left: 20px;">

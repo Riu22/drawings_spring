@@ -16,7 +16,6 @@ public class public_service {
     @Autowired
     draw_dao draw_dao;
 
-
     public List<gallery_record> select_public_draw_details(){
 
         List<draw> draws = draw_dao.select_public_draws();
@@ -46,7 +45,8 @@ public class public_service {
                     d.isPublic(),
                     version_number,
                     draw_content,
-                    false
+                    false,
+                    d.getUser_id()
             );
 
             gallery_items.add(item);

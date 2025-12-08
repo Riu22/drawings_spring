@@ -2,8 +2,8 @@ package com.drawings.drawings.service;
 
 import com.drawings.drawings.dao.draw_dao;
 import com.drawings.drawings.model.draw;
-import com.drawings.drawings.model.draw_data; // Necesitas este import para el contenido
-import com.drawings.drawings.model.version;  // Necesitas este import para la versión
+import com.drawings.drawings.model.draw_data;
+import com.drawings.drawings.model.version;
 import com.drawings.drawings.records.gallery_record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,8 +32,9 @@ public class trash_service {
                     d.isPublic(),
                     0,
                     "",
-                    true
-                    );
+                    true,
+                    d.getUser_id()
+            );
 
             gallery_items.add(item);
         }
