@@ -1,6 +1,6 @@
 package com.drawings.drawings.service;
 
-import com.drawings.drawings.dao.draw_dao;
+import com.drawings.drawings.dao.*;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.model.version;
@@ -13,16 +13,20 @@ import java.util.Optional;
 public class load_service {
 
     @Autowired
-    private draw_dao draw_dao;
+    draw_dao draw_dao;
+    @Autowired
+    data_version_dao data_version_dao;
+    @Autowired
+    user_dao user_dao;
 
 
     public Optional<String> load_draw_content(int draw_id) {
-        version latest_version = draw_dao.select_latest_draw_version(draw_id);
+        version latest_version = data_version_dao.select_latest_draw_version(draw_id);
         if (latest_version == null) {
             return Optional.empty();
         }
 
-        draw_data draw_data = draw_dao.select_draw_data(latest_version.getId());
+        draw_data draw_data = data_version_dao.select_draw_data(latest_version.getId());
 
         if (draw_data != null && draw_data.getDraw_content() != null) {
             return Optional.of(draw_data.getDraw_content());
@@ -33,7 +37,7 @@ public class load_service {
 
 
     public Optional<String> load_draw_content_by_version(int draw_id, int version_number) {
-        Optional<version> versionOptional = draw_dao.select_version_by_number(draw_id, version_number);
+        Optional<version> versionOptional = data_version_dao.select_version_by_number(draw_id, version_number);
 
         if (versionOptional.isEmpty()) {
             return Optional.empty();
@@ -59,6 +63,6 @@ public class load_service {
     }
 
     public String get_author(int user_id) {
-        return draw_dao.select_autor_by_id(user_id);
+        return user_dao.select_autor_by_id(user_id);
     }
 }

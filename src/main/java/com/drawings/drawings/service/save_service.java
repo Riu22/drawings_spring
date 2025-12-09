@@ -1,7 +1,7 @@
 package com.drawings.drawings.service;
 
 import com.drawings.drawings.dao.draw_dao;
-import com.drawings.drawings.dao.user_dao;
+import com.drawings.drawings.dao.*;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.model.user;
@@ -17,10 +17,14 @@ import java.util.Optional;
 public class save_service {
 
     @Autowired
-    private draw_dao draw_dao;
+    draw_dao draw_dao;
 
     @Autowired
-    private user_dao user_dao;
+    user_dao user_dao;
+    @Autowired
+    permission_dao permission_dao;
+    @Autowired
+    data_version_dao data_version_dao;
 
     public int iduser(String name) {
         user user = user_dao.find_user(name);
@@ -33,13 +37,13 @@ public class save_service {
     @Transactional
     public void save_draw_content_and_version(int draw_id, String drawing_content) {
 
-        int latest_version_number = draw_dao.get_latest_version_number(draw_id);
+        int latest_version_number = data_version_dao.get_latest_version_number(draw_id);
 
         int new_version_number = latest_version_number + 1;
 
-        int version_id = draw_dao.add_version(draw_id, new_version_number);
+        int version_id = data_version_dao.add_version(draw_id, new_version_number);
 
-        draw_dao.add_draw_content(version_id, drawing_content);
+        data_version_dao.add_draw_content(version_id, drawing_content);
     }
 
     @Transactional
@@ -50,7 +54,7 @@ public class save_service {
             draw new_draw = new draw(user_id, title, is_public);
             draw current_draw = draw_dao.add_draw(new_draw);
 
-            int version_id = draw_dao.add_version(current_draw.getId(), 1); // Versión 1
+            int version_id = data_version_dao.add_version(current_draw.getId(), 1);
             draw_dao.add_draw_content(version_id, drawing_content);
 
             return current_draw;
@@ -84,11 +88,11 @@ public class save_service {
                 .orElseThrow(() -> new NoSuchElementException("Dibujo original ID " + original_draw_id + " no encontrado."));
 
         // 2. Obtener el contenido de la versión específica
-        Optional<version> version_optional = draw_dao.select_version_by_number(original_draw_id, version_number);
+        Optional<version> version_optional = data_version_dao.select_version_by_number(original_draw_id, version_number);
         version selected_version = version_optional
                 .orElseThrow(() -> new NoSuchElementException("Versión " + version_number + " no encontrada."));
 
-        draw_data version_data = draw_dao.select_draw_data(selected_version.getId());
+        draw_data version_data = data_version_dao.select_draw_data(selected_version.getId());
         if (version_data == null || version_data.getDraw_content() == null) {
             throw new NoSuchElementException("Contenido de la versión no encontrado.");
         }

@@ -2,27 +2,37 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title th:text="'Compartir: ' + ${drawTitle}"></title>
+    <link rel="stylesheet" href="/css/permissions.css">
 </head>
-<body>
-<h2 th:text="'Compartir Dibujo: ' + ${drawTitle}"></h2>
+<body><nav class="sidebar">
+    <a href="/draw/new" class="brand">Drawings</a>
+    <a href="/gallery/private">Gallery</a>
+    <a href="/gallery/public">Public Gallery</a>
+    <a href="/gallery/trash">bin</a>
+    <a href="/logout">Logout</a>
+</nav>
 
-<div class="permission-form">
-    <input type="hidden" id="drawId" th:value="${drawId}">
+<div style="width: 100%; margin-left: 240px; padding-left: 40px; box-sizing: border-box;">
+    <h2 th:text="'Compartir Dibujo: ' + ${drawTitle}">Compartir Dibujo: Título Ejemplo</h2>
 
-    <label for="collaboratorUsername">Nombre de Usuario del Colaborador:</label>
-    <input type="text" id="collaboratorUsername" required>
+    <div class="permission-form">
+        <input type="hidden" id="drawId" th:value="${drawId}">
 
-    <label>Permisos:</label>
-    <input type="checkbox" id="canReadCheckbox">
-    <label for="canReadCheckbox">Visualizar (Leer)</label><br>
+        <label for="collaboratorUsername">Nombre de Usuario del Colaborador:</label>
+        <input type="text" id="collaboratorUsername" required>
 
-    <input type="checkbox" id="canWriteCheckbox">
-    <label for="canWriteCheckbox">Editar (Escribir)</label><br>
+        <label>Permisos:</label>
+        <input type="checkbox" id="canReadCheckbox">
+        <label for="canReadCheckbox">Visualizar (Leer)</label><br>
 
-    <button id="grantPermissionsBtn">Asignar Permisos</button>
+        <input type="checkbox" id="canWriteCheckbox">
+        <label for="canWriteCheckbox">Editar (Escribir)</label><br>
+
+        <button id="grantPermissionsBtn">Asignar Permisos</button>
+    </div>
+
+    <p id="messageArea" style="margin-top: 10px; font-weight: bold;"></p>
 </div>
-
-<p id="messageArea" style="margin-top: 10px; font-weight: bold;"></p>
 
 <script th:inline="javascript">
     // permission_manager.js

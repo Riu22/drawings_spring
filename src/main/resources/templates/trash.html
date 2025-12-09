@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="/css/gallery.css">
 </head>
 <body>
 <nav class="sidebar">
@@ -16,12 +17,10 @@
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
     <p>Author: <span th:text="${username}">1</span></p>
     <a th:href="@{/trash/delete/{id}(id=${drawing.id()})}"
-       onclick="return confirm('¿Estás seguro de que quieres eliminar este dibujo permanentemente? Esta acción no se puede deshacer.');"
-       style="color: red; margin-left: 20px;">
+       onclick="return confirm('¿Estás seguro de que quieres eliminar este dibujo permanentemente? Esta acción no se puede deshacer.');">
         Eliminar Permanentemente
     </a>
-    <a th:href="@{/trash/rescue/{id}(id=${drawing.id()})}"
-       style="color: green; margin-left: 20px;">
+    <a th:href="@{/trash/rescue/{id}(id=${drawing.id()})}">
         Restaurar Dibujo
     </a>
 </div>

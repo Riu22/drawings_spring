@@ -1,6 +1,9 @@
 package com.drawings.drawings.service;
 
+import com.drawings.drawings.dao.data_version_dao;
 import com.drawings.drawings.dao.draw_dao;
+import com.drawings.drawings.dao.permission_dao;
+import com.drawings.drawings.dao.user_dao;
 import com.drawings.drawings.model.draw;
 import com.drawings.drawings.model.draw_data;
 import com.drawings.drawings.model.version;
@@ -15,10 +18,17 @@ public class trash_service {
 
     @Autowired
     draw_dao draw_dao;
+    @Autowired
+    user_dao user_dao;
+    @Autowired
+    permission_dao permission_dao;
+    @Autowired
+    data_version_dao data_version_dao;
+
 
     public List<gallery_record> get_trashed_draws(int owner_id) {
         List<draw> trashed_draws = draw_dao.select_trashed_draws(owner_id);
-        String author = draw_dao.select_autor_by_id(owner_id);
+        String author = user_dao.select_autor_by_id(owner_id);
 
         if (trashed_draws.isEmpty()) {
             return new ArrayList<>();

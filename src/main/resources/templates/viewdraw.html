@@ -388,6 +388,9 @@ input[type="range"]::-moz-range-track {
     /**
      * Dibuja un único objeto (forma o trazo) en el Canvas.
      */
+    /**
+     * Dibuja un único objeto (forma o trazo) en el Canvas.
+     */
     function draw_object(obj) {
         const scale = parseFloat(canvas.dataset.scale) || 1;
         const offsetX = parseFloat(canvas.dataset.offsetX) || 0;
@@ -424,6 +427,42 @@ input[type="range"]::-moz-range-track {
         } else if (obj.type === 'square') {
             const half_size = (obj.size || 40) / 2;
             ctx.fillRect(obj.x - half_size, obj.y - half_size, obj.size, obj.size);
+
+        } else if (obj.type === 'triangle') {
+            // Dibujar un triángulo isósceles con el centro en (obj.x, obj.y)
+            const size_half = (obj.size || 40) / 2;
+            const h = Math.sqrt(Math.pow(obj.size, 2) - Math.pow(size_half, 2));
+            const altura_base = h / 3;
+            const altura_punta = h - altura_base;
+
+            ctx.beginPath();
+            ctx.moveTo(obj.x, obj.y - altura_punta);
+            ctx.lineTo(obj.x - size_half, obj.y + altura_base);
+            ctx.lineTo(obj.x + size_half, obj.y + altura_base);
+            ctx.closePath();
+            ctx.fill();
+
+        } else if (obj.type === 'star') {
+            // Estrella de 7 puntas (igual que en drawing.js)
+            const num_points = 7;
+            const size_half = (obj.size || 40) / 2;
+            const outer_radius = size_half;
+            const inner_radius = outer_radius * 0.4;
+
+            ctx.beginPath();
+            for (let i = 0; i < num_points * 2; i++) {
+                const angle = (Math.PI / num_points) * i - Math.PI / 2;
+                const radius = i % 2 === 0 ? outer_radius : inner_radius;
+                const x = obj.x + Math.cos(angle) * radius;
+                const y = obj.y + Math.sin(angle) * radius;
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
         }
 
         ctx.restore();

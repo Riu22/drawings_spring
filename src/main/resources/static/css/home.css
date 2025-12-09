@@ -2,13 +2,16 @@ body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #1a1a1a;
-    color: #000000;
+    color: #f0f0f0;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .page-container {
     display: flex;
     height: 100vh;
 }
+
 
 .sidebar {
     width: 200px;
@@ -17,22 +20,25 @@ body {
     display: flex;
     flex-direction: column;
     color: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar .brand {
     font-size: 1.8em;
     font-weight: bold;
     margin-bottom: 30px;
-    color: white;
+    color: #007bff;
     text-decoration: none;
 }
 
 .sidebar a {
     color: #f0f0f0;
     text-decoration: none;
-    padding: 10px 0;
+    padding: 10px; 
+    margin: 2px 0;
     font-size: 1.1em;
     transition: background-color 0.3s;
+    border-radius: 3px;
 }
 
 .sidebar a:hover {
@@ -43,176 +49,175 @@ body {
     font-size: 0.9em;
     padding: 10px 0;
     margin-bottom: 20px;
+    border-bottom: 1px solid #444;
 }
+
 
 .main-content {
     flex-grow: 1;
     padding: 20px;
     overflow-y: auto;
+    background-color: #1a1a1a;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-container {
     display: flex;
-    height: 100%;
+    flex-grow: 1;
+    gap: 20px;
+    min-height: 0;
 }
+
 
 .canvas-container {
     flex-grow: 1;
-    padding-right: 20px;
     height: 100%;
+    background-color: #333333;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #drawingCanvas {
     background-color: white;
     border: 1px solid #ccc;
-    width: 100%;
-    height: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
+
 
 .controls-container {
     width: 200px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+    background-color: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    color: #f0f0f0;
+    overflow-y: auto;
 }
 
 .controls-container .button-link {
     width: 100%;
+    display: block;
 }
 
 .controls-container .button-link {
-    display: inline-block;
-    padding: 12px 20px;
+    padding: 10px 15px;
     background-color: #007bff;
     color: #ffffff;
-    text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
     border: none;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.controls-container .button-link.selected {
-    background-color: #6c757d;
-    border-color: #6c757d;
+.controls-container .button-link:hover {
+    background-color: #0056b3;
 }
 
-#colorPicker {
+
+#drawTitleInput {
     width: 100%;
-    height: 40px;
-    padding: 5px;
+    padding: 10px;
+    margin: 5px 0 10px 0;
     border: 1px solid #444;
     border-radius: 5px;
     background-color: #333;
     color: #f0f0f0;
     box-sizing: border-box;
-    cursor: pointer;
+    font-size: 1em;
 }
 
-.clr-field {
-    width: 100%;
-    height: 40px;
-    padding: 5px;
-    cursor: pointer;
-    border: 1px solid #444;
-    border-radius: 5px;
-    background-color: #333;
-    box-sizing: border-box;
+.controls-container > label {
     display: flex;
     align-items: center;
+    gap: 5px;
+    font-weight: normal;
+    font-size: 0.95em;
+    margin: 5px 0;
 }
 
-.clr-field button {
-    width: 100%;
-    height: 100%;
+#isPublicCheckbox,
+#autoSaveCheckbox {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #444;
     border-radius: 3px;
-    border: none;
+    background-color: #333;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s, border-color 0.2s;
+    margin-right: 5px;
+}
+
+#isPublicCheckbox:checked,
+#autoSaveCheckbox:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+#isPublicCheckbox:checked::after,
+#autoSaveCheckbox:checked::after {
+    content: '✓';
+    font-size: 12px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+div[th\\:if="${editingVersion != null}"] {
+    /* Estilos del aviso */
+    background-color: #493c00 !important; /* Adaptado a tema oscuro */
+    border: 1px solid #ffaa00 !important;
+    color: #ffaa00 !important;
+    padding: 15px;
+    margin: 0 0 20px 0 !important;
+    border-radius: 5px;
+}
+
+div[th\\:if="${editingVersion != null}"] strong {
+    color: #ffffff;
+}
+
+#colorPicker {
 }
 
 input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 8px;
-    background: #444;
-    border-radius: 5px;
-    outline: none;
-    cursor: pointer;
-    padding: 0;
-    margin: 15px 0;
+    margin: 10px 0 15px 0;
 }
 
-input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #007bff;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #ffffff;
-    margin-top: -6px;
-}
+@media (max-width: 800px) {
+    .main-container {
+        flex-direction: column;
+    }
 
-input[type="range"]::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #007bff;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #ffffff;
-}
+    .controls-container {
+        width: auto;
+        order: -1;
+    }
 
-input[type="range"]::-moz-range-track {
-    background: #444;
-    height: 8px;
-    border-radius: 5px;
-}
+    .sidebar {
+        width: 60px;
+        padding: 10px 0;
+    }
 
-.object-item {
-    padding: 8px;
-    margin: 5px 0;
-    background: white;
-    border-radius: 3px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.2s;
-}
+    .sidebar .user-info, .sidebar .brand {
+        display: none;
+    }
 
-.object-item:hover {
-    background: #e8e8e8;
-}
-
-.object-item.selected {
-    background: #d0e8ff;
-    border: 2px solid #0066cc;
-}
-
-.object-info {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex: 1;
-}
-
-.delete-btn {
-    background: #ff4444;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.delete-btn:hover {
-    background: #cc0000;
+    .sidebar a {
+        text-align: center;
+        padding: 10px 5px;
+    }
 }

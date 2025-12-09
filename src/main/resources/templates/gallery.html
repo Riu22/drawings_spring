@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gallery</title>
+    <link rel="stylesheet" href="/css/gallery.css">
 </head>
 <body>
 <nav class="sidebar">
@@ -35,7 +36,7 @@
         Papelera
     </a>
 
-    <a th:href="@{/draw/share/{id}(id=${drawing.id()})}">
+    <a th:href="@{/share/{id}(id=${drawing.id()})}">
         Compartir
     </a>
 

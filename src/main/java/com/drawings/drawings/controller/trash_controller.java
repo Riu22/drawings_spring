@@ -53,9 +53,9 @@ public class trash_controller {
             boolean success = trash_service.delete_trashed_draw(drawId, user_id);
 
             if (success) {
-                return "redirect:/trash?message=Dibujo eliminado permanentemente.";
+                return "redirect:/gallery/trash?message=Dibujo eliminado permanentemente.";
             } else {
-                return "redirect:/trash?error=No se pudo eliminar el dibujo o acceso denegado.";
+                return "redirect:/gallery/trash?error=No se pudo eliminar el dibujo o acceso denegado.";
             }
 
         } catch (java.util.NoSuchElementException e) {
@@ -71,7 +71,7 @@ public class trash_controller {
             boolean success = trash_service.rescue_from_trash(drawId, save_service.iduser((String) session.getAttribute("username")));
 
             if (success) {
-                return "redirect:/gallery?message=Dibujo movido a la papelera.";
+                return "redirect:/gallery/private?message=Dibujo restaurado.";
             } else {
                 return "redirect:/gallery?error=No se pudo mover el dibujo a la papelera o acceso denegado.";
             }

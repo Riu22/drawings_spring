@@ -32,17 +32,14 @@ public class draw_controller {
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
 
-        // Si no está autenticado, redirigir al login
         if (username == null) {
             return "redirect:/login";
         }
 
-        // Obtener el ID del usuario logueado
         int loggedUserId;
         try {
             loggedUserId = save_service.iduser(username);
         } catch (NoSuchElementException e) {
-            // Esto debería ser manejado por un Interceptor, pero es una buena guardia
             return "redirect:/login";
         }
 
@@ -52,7 +49,6 @@ public class draw_controller {
         model.addAttribute("initialDrawContent", "{}");
         model.addAttribute("canEdit", true);
 
-        // --- Lógica de Carga y Permisos ---
 
         if (drawIdOptional.isPresent()) {
             int drawId = drawIdOptional.get();
@@ -66,26 +62,21 @@ public class draw_controller {
 
                 draw currentDraw = drawMetadata.get();
 
-                // 1. Verificar si el usuario puede escribir (dueño o colaborador con can_write)
                 boolean canEdit = permission_service.can_user_write(drawId, loggedUserId);
 
                 if (!canEdit) {
-                    // Si no puede editar, se le niega el acceso a la interfaz de edición
                     return "redirect:/error?message=Acceso denegado. No tienes permisos de edición.";
-                    // Alternativamente, podrías redirigir a la vista de solo lectura:
-                    // return "redirect:/view/" + drawId;
+
                 }
 
-                // 2. Cargar el contenido de la última versión usando load_draw_content
                 Optional<String> drawContentOptional = load_service.load_draw_content(drawId);
                 String drawContent = drawContentOptional.orElse("{}");
 
-                // 3. Añadir datos al modelo para la edición
                 model.addAttribute("drawId", drawId);
                 model.addAttribute("drawTitle", currentDraw.getTitle());
                 model.addAttribute("isPublic", currentDraw.isPublic());
                 model.addAttribute("initialDrawContent", drawContent);
-                model.addAttribute("canEdit", true); // Confirmamos que puede editar
+                model.addAttribute("canEdit", true);
 
             } catch (Exception e) {
                 System.err.println("Error al cargar el dibujo para edición: " + e.getMessage());
@@ -165,9 +156,7 @@ public class draw_controller {
         }
     }
 
-    /**
-     * Muestra la lista de versiones de un dibujo
-     */
+
     @GetMapping("/draw/{drawId}/versions")
     public String showVersions(@PathVariable("drawId") int drawId,
                                HttpSession session,
@@ -182,7 +171,6 @@ public class draw_controller {
         try {
             int userId = save_service.iduser(username);
 
-            // Verificar que el dibujo existe y el usuario tiene acceso
             Optional<draw> drawOptional = load_service.get_draw_metadata(drawId);
 
             if (drawOptional.isEmpty()) {
@@ -191,7 +179,6 @@ public class draw_controller {
 
             draw drawMetadata = drawOptional.get();
 
-            // Verificar permisos (debe poder leer o ser público)
             boolean canView = drawMetadata.isPublic() ||
                     drawMetadata.getUser_id() == userId ||
                     permission_service.can_user_read(drawId, userId);
@@ -200,7 +187,6 @@ public class draw_controller {
                 return "redirect:/error?message=Acceso denegado";
             }
 
-            // Obtener todas las versiones
             List<version> versions = load_service.get_all_versions(drawId);
 
             model.addAttribute("drawId", drawId);
@@ -216,9 +202,6 @@ public class draw_controller {
         }
     }
 
-    /**
-     * Muestra una versión específica de un dibujo (solo lectura)
-     */
     @GetMapping("/view/{drawId}/version/{versionNumber}")
     public String viewSpecificVersion(@PathVariable("drawId") int drawId,
                                       @PathVariable("versionNumber") int versionNumber,
@@ -238,12 +221,10 @@ public class draw_controller {
 
             draw drawMetadata = drawOptional.get();
 
-            // Verificar permisos
             if (!drawMetadata.isPublic() && drawMetadata.getUser_id() != userId) {
                 return "redirect:/error?message=Acceso denegado al dibujo";
             }
 
-            // Cargar contenido de la versión específica
             Optional<String> contentOptional = load_service.load_draw_content_by_version(drawId, versionNumber);
             String drawContent = contentOptional.orElse("[]");
 
@@ -253,7 +234,7 @@ public class draw_controller {
             model.addAttribute("versionNumber", versionNumber);
             model.addAttribute("username", username);
 
-            return "viewdraw"; // Reutiliza la vista existente
+            return "viewdraw";
 
         } catch (Exception e) {
             System.err.println("Error al cargar versión específica: " + e.getMessage());
@@ -261,9 +242,6 @@ public class draw_controller {
         }
     }
 
-    /**
-     * Edita una versión específica de un dibujo
-     */
     @GetMapping("/draw/{drawId}/version/{versionNumber}")
     public String editSpecificVersion(@PathVariable("drawId") int drawId,
                                       @PathVariable("versionNumber") int versionNumber,
@@ -288,24 +266,21 @@ public class draw_controller {
 
             draw currentDraw = drawMetadata.get();
 
-            // Verificar permisos de escritura
             boolean canEdit = permission_service.can_user_write(drawId, loggedUserId);
 
             if (!canEdit) {
                 return "redirect:/error?message=Acceso denegado. No tienes permisos de edición.";
             }
 
-            // Cargar contenido de la versión específica
             Optional<String> drawContentOptional = load_service.load_draw_content_by_version(drawId, versionNumber);
             String drawContent = drawContentOptional.orElse("[]");
 
-            // Añadir datos al modelo para la edición
             model.addAttribute("drawId", drawId);
             model.addAttribute("drawTitle", currentDraw.getTitle());
             model.addAttribute("isPublic", currentDraw.isPublic());
             model.addAttribute("initialDrawContent", drawContent);
             model.addAttribute("canEdit", true);
-            model.addAttribute("editingVersion", versionNumber); // Indicador de que se está editando una versión antigua
+            model.addAttribute("editingVersion", versionNumber);
 
             return "drawing";
 
@@ -315,9 +290,7 @@ public class draw_controller {
         }
     }
 
-    /**
-     * Clona una versión específica creando un nuevo dibujo independiente
-     */
+
     @PostMapping("/draw/{drawId}/version/{versionNumber}/clone")
     public String cloneVersion(@PathVariable("drawId") int drawId,
                                @PathVariable("versionNumber") int versionNumber,

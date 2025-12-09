@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class user_dao {
@@ -60,5 +60,21 @@ public class user_dao {
         String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);
         return count != null && count > 0;
+    }
+
+    public Optional<String> select_author_by_id(int userId) {
+        String sql = "SELECT username FROM users WHERE id = ?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, String.class, userId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+
+    public String select_autor_by_id(int user_id){
+        String sql = "SELECT username FROM users WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, user_id);
+
     }
 }

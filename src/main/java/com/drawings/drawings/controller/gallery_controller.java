@@ -48,7 +48,7 @@ public class gallery_controller {
             boolean success = trash_service.move_to_trash(draw_id, user_id);
 
             if (success) {
-                return "redirect:/gallery?message=Dibujo enviado a la papelera.";
+                return "redirect:/gallery/private?message=Dibujo movido a papelera.";
             } else {
                 return "redirect:/gallery?error=Acceso denegado o dibujo no encontrado.";
             }

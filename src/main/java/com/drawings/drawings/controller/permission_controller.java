@@ -20,7 +20,9 @@ public class permission_controller {
 
     @Autowired
     load_service load_service;
+    @Autowired
     save_service save_service;
+    @Autowired
     permission_service permission_service;
     public record PermissionRequest(
             int draw_id,
