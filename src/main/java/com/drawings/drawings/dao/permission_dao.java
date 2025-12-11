@@ -44,7 +44,7 @@ public class permission_dao {
     public Optional<permissions> get_permissions_for_user(int draw_id, int user_id) {
         String sql = "SELECT user_id, draw_id, can_read, can_write FROM permissios WHERE draw_id = ? AND user_id = ?";
         try {
-            permissions result = jdbcTemplate.queryForObject(sql, permissionRowMapper(), user_id, draw_id);
+            permissions result = jdbcTemplate.queryForObject(sql, permissionRowMapper(), draw_id, user_id);
             return Optional.ofNullable(result);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();

@@ -116,13 +116,12 @@ public class draw_controller {
         }
     }
 
-
     @GetMapping("/view/{drawId}")
     public String load_draw(@PathVariable("drawId") int draw_id, Model model, HttpSession session){
 
         String username = (String) session.getAttribute("username");
         try {
-            int owner_id = save_service.iduser(username);
+            int user_id = save_service.iduser(username);
 
             Optional<draw> optional_draw = load_service.get_draw_metadata(draw_id);
 
@@ -133,7 +132,11 @@ public class draw_controller {
             draw draw_metadata = optional_draw.get();
             String author = load_service.get_author(draw_metadata.getUser_id());
 
-            if (!draw_metadata.isPublic() && draw_metadata.getUser_id() != owner_id) {
+            boolean canView = draw_metadata.isPublic() ||
+                    draw_metadata.getUser_id() == user_id ||
+                    permission_service.can_user_read(draw_id, user_id);
+
+            if (!canView) {
                 return "redirect:/error?message=Acceso denegado al dibujo";
             }
 
@@ -221,7 +224,11 @@ public class draw_controller {
 
             draw drawMetadata = drawOptional.get();
 
-            if (!drawMetadata.isPublic() && drawMetadata.getUser_id() != userId) {
+            boolean canView = drawMetadata.isPublic() ||
+                    drawMetadata.getUser_id() == userId ||
+                    permission_service.can_user_read(drawId, userId);
+
+            if (!canView) {
                 return "redirect:/error?message=Acceso denegado al dibujo";
             }
 

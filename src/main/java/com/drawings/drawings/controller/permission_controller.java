@@ -1,5 +1,3 @@
-// permission_controller.java - AJUSTADO A @Controller
-
 package com.drawings.drawings.controller;
 
 import com.drawings.drawings.model.draw;
