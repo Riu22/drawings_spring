@@ -194,7 +194,7 @@ public class draw_controller {
             model.addAttribute("versions", versions);
             model.addAttribute("username", username);
 
-            return "versions"; // Nueva vista para mostrar versiones
+            return "versions";
 
         } catch (Exception e) {
             System.err.println("Error al cargar versiones: " + e.getMessage());
@@ -306,7 +306,6 @@ public class draw_controller {
         try {
             int userId = save_service.iduser(username);
 
-            // Verificar que el usuario tiene acceso de lectura al dibujo original
             Optional<draw> drawOptional = load_service.get_draw_metadata(drawId);
 
             if (drawOptional.isEmpty()) {
@@ -315,7 +314,6 @@ public class draw_controller {
 
             draw originalDraw = drawOptional.get();
 
-            // Verificar permisos de lectura
             boolean canRead = originalDraw.isPublic() ||
                     originalDraw.getUser_id() == userId ||
                     permission_service.can_user_read(drawId, userId);
@@ -324,10 +322,8 @@ public class draw_controller {
                 return "redirect:/error?message=Acceso denegado. No puedes copiar este dibujo.";
             }
 
-            // Clonar el dibujo desde la versión específica
             draw clonedDraw = save_service.clone_draw_from_version(drawId, versionNumber, userId, newTitle);
 
-            // Redirigir al editor del nuevo dibujo
             return "redirect:/draw/" + clonedDraw.getId() + "?message=Dibujo clonado con éxito";
 
         } catch (NoSuchElementException e) {

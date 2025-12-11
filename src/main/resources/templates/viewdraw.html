@@ -305,23 +305,12 @@ input[type="range"]::-moz-range-track {
 
 <script th:inline="javascript">
 
-    // =========================================================================
-    // 2.1 Variables Globales y Contexto
-    // =========================================================================
-
     const canvas = document.getElementById('drawing_canvas');
     const ctx = canvas.getContext('2d');
     let objects = [];
 
     const draw_content_json = [[${drawContentJson}]] || null;
 
-    // =========================================================================
-    // 2.2 Funciones de Redimensionamiento del Canvas
-    // =========================================================================
-
-    /**
-     * Calcula y establece el tamaño óptimo del canvas basado en el contenido
-     */
     function resize_canvas() {
         const container = canvas.parentElement;
         const containerWidth = container.clientWidth;
@@ -354,43 +343,28 @@ input[type="range"]::-moz-range-track {
             }
         });
 
-        // Si no hay objetos, usar tamaño por defecto
         if (objects.length === 0 || !isFinite(minX)) {
             canvas.width = 800;
             canvas.height = 600;
             return;
         }
 
-        // Añadir padding
         const padding = 20;
         const contentWidth = maxX - minX + (padding * 2);
         const contentHeight = maxY - minY + (padding * 2);
 
-        // Calcular escala para que quepa en el contenedor
         const scaleX = containerWidth / contentWidth;
         const scaleY = containerHeight / contentHeight;
         const scale = Math.min(scaleX, scaleY, 1); // No escalar más grande que el original
 
-        // Establecer tamaño del canvas
         canvas.width = contentWidth * scale;
         canvas.height = contentHeight * scale;
 
-        // Guardar la escala y offset para el dibujo
         canvas.dataset.scale = scale;
         canvas.dataset.offsetX = minX - padding;
         canvas.dataset.offsetY = minY - padding;
     }
 
-    // =========================================================================
-    // 2.3 Funciones de Dibujo
-    // =========================================================================
-
-    /**
-     * Dibuja un único objeto (forma o trazo) en el Canvas.
-     */
-    /**
-     * Dibuja un único objeto (forma o trazo) en el Canvas.
-     */
     function draw_object(obj) {
         const scale = parseFloat(canvas.dataset.scale) || 1;
         const offsetX = parseFloat(canvas.dataset.offsetX) || 0;
@@ -429,7 +403,6 @@ input[type="range"]::-moz-range-track {
             ctx.fillRect(obj.x - half_size, obj.y - half_size, obj.size, obj.size);
 
         } else if (obj.type === 'triangle') {
-            // Dibujar un triángulo isósceles con el centro en (obj.x, obj.y)
             const size_half = (obj.size || 40) / 2;
             const h = Math.sqrt(Math.pow(obj.size, 2) - Math.pow(size_half, 2));
             const altura_base = h / 3;
@@ -443,7 +416,6 @@ input[type="range"]::-moz-range-track {
             ctx.fill();
 
         } else if (obj.type === 'star') {
-            // Estrella de 7 puntas (igual que en drawing.js)
             const num_points = 7;
             const size_half = (obj.size || 40) / 2;
             const outer_radius = size_half;
@@ -468,9 +440,6 @@ input[type="range"]::-moz-range-track {
         ctx.restore();
     }
 
-    /**
-     * Limpia el lienzo y redibuja todos los objetos cargados.
-     */
     function redraw_canvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         objects.forEach(obj => {
@@ -478,13 +447,6 @@ input[type="range"]::-moz-range-track {
         });
     }
 
-    // =========================================================================
-    // 2.4 Función de Carga
-    // =========================================================================
-
-    /**
-     * Carga el dibujo desde el JSON proporcionado por el servidor.
-     */
     function load_drawing(json_string) {
         console.log("Intentando cargar JSON...");
         try {
@@ -506,10 +468,6 @@ input[type="range"]::-moz-range-track {
             redraw_canvas();
         }
     }
-
-    // =========================================================================
-    // 3. Ejecución al Cargar la Página
-    // =========================================================================
 
     document.addEventListener('DOMContentLoaded', function() {
         if (draw_content_json && draw_content_json.length > 2) {

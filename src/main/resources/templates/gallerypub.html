@@ -44,21 +44,17 @@
 
         const title = prompt('Introduce un título para la copia del dibujo (opcional):');
 
-        // Si el usuario cancela el prompt, no hacer nada
         if (title === null) {
             return;
         }
 
-        // Obtener el número de la última versión del dibujo
         const versionElement = event.target.closest('div').querySelector('span');
         const versionNumber = versionElement ? parseInt(versionElement.textContent) : 1;
 
-        // Crear un formulario para enviar la solicitud POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/draw/${drawId}/version/${versionNumber}/clone`;
 
-        // Si se proporcionó un título, añadirlo
         if (title && title.trim() !== '') {
             const titleInput = document.createElement('input');
             titleInput.type = 'hidden';

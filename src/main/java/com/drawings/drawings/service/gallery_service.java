@@ -47,7 +47,6 @@ public class gallery_service {
                 }
             }
 
-            // Cálculo de Permiso de Edición (can_edit)
             boolean is_owner = d.getUser_id() == user_id;
             boolean can_edit = is_owner;
 

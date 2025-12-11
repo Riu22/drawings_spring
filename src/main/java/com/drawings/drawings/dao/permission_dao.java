@@ -31,7 +31,6 @@ public class permission_dao {
             String updateSql = "UPDATE permissios SET can_read = ?, can_write = ? WHERE draw_id = ? AND user_id = ?";
             jdbcTemplate.update(updateSql, can_read, can_write, draw_id, user_id);
         } else {
-            // INSERT: Si no existe, crea la entrada
             String insertSql = "INSERT INTO permissios (draw_id, user_id, can_read, can_write) VALUES (?, ?, ?, ?)";
             jdbcTemplate.update(insertSql, draw_id, user_id, can_read, can_write);
         }
@@ -56,10 +55,8 @@ public class permission_dao {
         String sql = "SELECT can_write FROM permissios WHERE draw_id = ? AND user_id = ?";
 
         try {
-            // queryForObject(String sql, Class<T> requiredType, Object... args)
             return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, drawId, userId));
         } catch (EmptyResultDataAccessException e) {
-            // Si no hay entrada en la tabla permissios, no tiene permiso explícito.
             return false;
         }
     }

@@ -18,7 +18,6 @@
     </nav>
 
     <main class="main-content">
-        <!-- Aviso de edición de versión antigua -->
         <div th:if="${editingVersion != null}" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 10px 20px; border-radius: 5px;">
             <strong>⚠️ Editando desde la versión <span th:text="${editingVersion}">X</span></strong>
             <p style="margin: 5px 0 0 0; font-size: 0.9em;">
@@ -74,7 +73,6 @@
 <!-- Script para cargar el contenido inicial -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Esperar a que drawing.js haya inicializado window.loadDrawing
         setTimeout(() => {
             if (window.loadDrawing && window.serverData.initialDrawContent) {
                 console.log('Cargando contenido inicial:', window.serverData.initialDrawContent);

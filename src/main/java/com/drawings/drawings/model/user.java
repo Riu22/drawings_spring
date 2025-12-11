@@ -19,11 +19,9 @@ public class user {
         this.username = username;
     }
 
-    // 3. Constructor vacío
     public user(){
     }
 
-    // Getters y Setters
     public int getId() {
         return id;
     }

@@ -35,7 +35,6 @@
 </div>
 
 <script th:inline="javascript">
-    // permission_manager.js
 
     document.addEventListener('DOMContentLoaded', () => {
         const drawIdInput = document.getElementById('drawId');
@@ -82,12 +81,10 @@
                 if (result === "SUCCESS") {
                     messageArea.textContent = `Permisos asignados con éxito a ${collaboratorUsername}.`;
                     messageArea.style.color = 'green';
-                    // Opcional: limpiar el formulario
                     usernameInput.value = '';
                     canReadCheckbox.checked = false;
                     canWriteCheckbox.checked = false;
                 } else {
-                    // Manejar los errores devueltos por el controlador
                     handleError(result);
                 }
 

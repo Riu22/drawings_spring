@@ -61,18 +61,14 @@ public class save_service {
 
         } else {
 
-            // 2.1. Verificar que el dibujo existe
             Optional<draw> optional_draw = draw_dao.select_draw_by_id(draw_id);
             draw current_draw = optional_draw
                     .orElseThrow(() -> new NoSuchElementException("Dibujo ID " + draw_id + " no encontrado."));
 
-            // 2.2. ⭐ ACTUALIZAR METADATOS (título e ispublic)
             draw_dao.update_draw_metadata(draw_id, title, is_public);
 
-            // 2.3. Crear nueva versión con el contenido actualizado
             save_draw_content_and_version(draw_id, drawing_content);
 
-            // 2.4. Actualizar el objeto draw en memoria con los nuevos valores
             current_draw.setTitle(title);
             current_draw.setPublic(is_public);
 
@@ -82,12 +78,10 @@ public class save_service {
     @Transactional
     public draw clone_draw_from_version(int original_draw_id, int version_number, int new_owner_id, String new_title) {
 
-        // 1. Obtener metadata del dibujo original
         Optional<draw> original_draw_optional = draw_dao.select_draw_by_id(original_draw_id);
         draw original_draw = original_draw_optional
                 .orElseThrow(() -> new NoSuchElementException("Dibujo original ID " + original_draw_id + " no encontrado."));
 
-        // 2. Obtener el contenido de la versión específica
         Optional<version> version_optional = data_version_dao.select_version_by_number(original_draw_id, version_number);
         version selected_version = version_optional
                 .orElseThrow(() -> new NoSuchElementException("Versión " + version_number + " no encontrada."));
@@ -99,16 +93,13 @@ public class save_service {
 
         String content_to_clone = version_data.getDraw_content();
 
-        // 3. Generar título para el clon
         String clone_title = (new_title != null && !new_title.trim().isEmpty())
                 ? new_title
                 : "Copia de " + original_draw.getTitle() + " (v" + version_number + ")";
 
-        // 4. Crear el nuevo dibujo
-        draw new_draw = new draw(new_owner_id, clone_title, false); // Por defecto privado
+        draw new_draw = new draw(new_owner_id, clone_title, false);
         draw created_draw = draw_dao.add_draw(new_draw);
 
-        // 5. Crear la versión 1 del nuevo dibujo con el contenido clonado
         int version_id = draw_dao.add_version(created_draw.getId(), 1);
         draw_dao.add_draw_content(version_id, content_to_clone);
 

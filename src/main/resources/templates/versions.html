@@ -56,17 +56,14 @@
     function cloneVersion(drawId, versionNumber) {
         const title = prompt('Introduce un título para la copia del dibujo (opcional):');
 
-        // Si el usuario cancela el prompt, no hacer nada
         if (title === null) {
             return;
         }
 
-        // Crear un formulario para enviar la solicitud POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/draw/${drawId}/version/${versionNumber}/clone`;
 
-        // Si se proporcionó un título, añadirlo
         if (title && title.trim() !== '') {
             const titleInput = document.createElement('input');
             titleInput.type = 'hidden';

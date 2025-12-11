@@ -57,17 +57,13 @@
             return;
         }
 
-        // Obtener el número de la última versión del dibujo
-        // En la galería siempre mostramos la última versión
         const versionElement = event.target.closest('div').querySelector('span');
         const versionNumber = versionElement ? parseInt(versionElement.textContent) : 1;
 
-        // Crear un formulario para enviar la solicitud POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/draw/${drawId}/version/${versionNumber}/clone`;
 
-        // Si se proporcionó un título, añadirlo
         if (title && title.trim() !== '') {
             const titleInput = document.createElement('input');
             titleInput.type = 'hidden';

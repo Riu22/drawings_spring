@@ -1,29 +1,24 @@
-// drawing.js
 
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('drawingCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // --- Variables de Estado Centralizadas ---
-    let objects = []; // Array para guardar el contenido del dibujo
-    let object_id_counter = 0; // Contador de IDs
+    let objects = [];
+    let object_id_counter = 0;
     
     let is_drawing = false;
     let current_mode = 'freeDraw';
-    let current_path = null; // Para almacenar el trazo libre actual
+    let current_path = null;
     
-    // Variables para SELECCIÓN y ARRASTRE
     let selected_object = null;
     let dragging_object = false;
     let drag_offset = { x: 0, y: 0 }; 
 
-    // --- Selectores de UI ---
     const color_picker = document.getElementById('colorPicker');
     const size_picker = document.getElementById('sizePicker');
     const object_list_container = document.getElementById('objectList');
     
-    // Botones de herramientas
     const circle_btn = document.getElementById('circleBtn');
     const square_btn = document.getElementById('squareBtn');
     const triangle_btn = document.getElementById('triangleBtn');
@@ -32,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const clear_btn = document.getElementById('clearBtn'); 
     const tool_buttons = [circle_btn, square_btn, triangle_btn, star_btn, free_draw_btn].filter(Boolean);
 
-    // --- Funciones de Utilidad ---
 
     function update_color_and_size() {
         const color = color_picker?.value || '#000000';
@@ -51,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             free_draw_btn.classList.add('selected');
         }
         is_drawing = false;
-        // Al cambiar de herramienta, deseleccionar objeto
         if (selected_object) {
              selected_object = null;
         }
@@ -61,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function clear_canvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        objects = []; // Limpiar la data
+        objects = [];
         selected_object = null;
         update_object_list();
     }
@@ -70,13 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const parent = canvas.parentElement;
         if (!parent) return;
 
-        // Guarda el estado actual del canvas (incluyendo zoom/transformaciones)
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         canvas.width = parent.clientWidth || canvas.width;
         canvas.height = parent.clientHeight || canvas.height;
 
-        // Restaura la imagen para mantener el dibujo visible (aunque la posición no sea perfecta)
         ctx.putImageData(imageData, 0, 0);
 
         redraw_canvas();
@@ -84,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function get_mouse_pos(canvas, evt) {
         const rect = canvas.getBoundingClientRect();
-        // Escala el punto para obtener coordenadas reales del canvas (útil si hay zoom CSS)
         const scale_x = canvas.width / rect.width;
         const scale_y = canvas.height / rect.height;
 
@@ -94,8 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- Funciones de Objeto ---
-    
+
     function add_shape(pos) {
         const { x, y } = pos;
         const { color, size } = update_color_and_size(); 
@@ -117,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         selected_object = obj;
 
         if (obj) {
-            // Sincronizar UI con propiedades del objeto seleccionado
             if (color_picker) color_picker.value = obj.color;
             if (size_picker) size_picker.value = obj.size;
         }
@@ -192,12 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function get_object_at_position(pos) {
-        // Itera al revés para seleccionar el objeto más arriba
         for (let i = objects.length - 1; i >= 0; i--) {
             const obj = objects[i];
             const size_half = (obj.size || 0) / 2;
 
-            // Detección de colisión para trazo libre (más complejo, basado en puntos)
             if (obj.type === 'freeDraw') {
                 if (obj.points && obj.points.length > 0) {
                     const threshold = obj.size + 5;
@@ -211,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                // Detección de colisión para formas geométricas (basado en centro y tamaño)
                 const dx = pos.x - obj.x;
                 const dy = pos.y - obj.y;
 
@@ -225,8 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         return obj;
                     }
                 } else if (obj.type === 'triangle') {
-                    // Implementación simplificada de detección de clic en un triángulo
-                    // Puedes usar un cálculo más preciso si es necesario
+
                     if (Math.abs(dx) <= size_half && dy <= size_half) { 
                          return obj;
                     }
@@ -236,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // --- Funciones de Dibujo ---
 
     function draw_object(obj, highlight = false) {
         ctx.fillStyle = obj.color;
@@ -251,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (obj.type === 'square') {
             ctx.fillRect(obj.x - size_half, obj.y - size_half, obj.size, obj.size);
         } else if (obj.type === 'triangle') {
-             // Dibujar un triángulo isósceles con el centro en (obj.x, obj.y)
             const h = Math.sqrt(Math.pow(obj.size, 2) - Math.pow(size_half, 2));
             const altura_base = h / 3;
             const altura_punta = h - altura_base;
@@ -263,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
             ctx.fill();
         } else if (obj.type === 'star') {
-            // Estrella de 7 puntas (por ejemplo)
             const num_points = 7;
             const outer_radius = size_half;
             const inner_radius = outer_radius * 0.4;
@@ -283,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
             ctx.fill();
         } else if (obj.type === 'freeDraw') {
-            // Dibujar el trazo
             if (obj.points && obj.points.length > 0) {
                 ctx.strokeStyle = obj.color;
                 ctx.lineWidth = obj.size;
@@ -300,16 +280,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Dibujar el recuadro de selección (highlight)
         if (highlight) {
             ctx.strokeStyle = '#00ff00';
             ctx.lineWidth = 2;
             
-            // Dibujar un cuadrado alrededor del centro/límites
             if (obj.type !== 'freeDraw') {
                  ctx.strokeRect(obj.x - size_half - 5, obj.y - size_half - 5, obj.size + 10, obj.size + 10);
             } else if (obj.points && obj.points.length > 0) {
-                 // Para trazo libre, puedes calcular su caja delimitadora (bounding box)
                  const minX = Math.min(...obj.points.map(p => p.x));
                  const minY = Math.min(...obj.points.map(p => p.y));
                  const maxX = Math.max(...obj.points.map(p => p.x));
@@ -328,29 +305,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Manejo de Eventos de Dibujo y Edición ---
 
     function start_drawing(e) {
         const pos = get_mouse_pos(canvas, e);
 
-        // 1. Intentar seleccionar/arrastrar un objeto
         const clicked_object = get_object_at_position(pos);
 
         if (clicked_object) {
             select_object(clicked_object);
             dragging_object = true;
 
-            // Calcular offset para arrastre
             if (clicked_object.type === 'freeDraw' && clicked_object.points.length > 0) {
-                // Usamos el centro de la bounding box o un punto fijo para el offset de trazos
-                drag_offset.x = pos.x - clicked_object.points[0].x; 
+                drag_offset.x = pos.x - clicked_object.points[0].x;
                 drag_offset.y = pos.y - clicked_object.points[0].y;
             } else {
                 drag_offset.x = pos.x - clicked_object.x;
                 drag_offset.y = pos.y - clicked_object.y;
             }
         } else {
-            // 2. Si no se seleccionó un objeto, iniciar dibujo (o crear forma)
             selected_object = null;
             redraw_canvas(); 
 
@@ -375,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const pos = get_mouse_pos(canvas, e);
 
         if (dragging_object && selected_object) {
-            // Mover objeto seleccionado
             if (selected_object.type === 'freeDraw') {
                 const delta_x = pos.x - drag_offset.x - selected_object.points[0].x;
                 const delta_y = pos.y - drag_offset.y - selected_object.points[0].y;
@@ -390,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             redraw_canvas();
         } else if (current_mode === 'freeDraw' && is_drawing && current_path) {
-            // Dibujar trazo libre
             current_path.points.push({ x: pos.x, y: pos.y });
 
             redraw_canvas();
@@ -414,27 +384,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ------------------------------------------------------------------------
-    // --- INTERFAZ GLOBAL PARA save.js (Guardado/Carga de Estado) ---
-    // ------------------------------------------------------------------------
-    
-    /**
-     * Devuelve el estado actual de los objetos (JSON) para guardar.
-     */
     window.getCanvasData = function() {
         return JSON.stringify(objects);
     };
-    
-    /**
-     * Carga el estado del dibujo desde una cadena JSON.
-     */
+
     window.loadDrawing = function(jsonString) {
         try {
             const loadedObjects = JSON.parse(jsonString);
             objects.length = 0; 
             objects.push(...loadedObjects);
             
-            // ⭐️ AJUSTE CRÍTICO DEL CONTADOR DE IDs ⭐️
             const maxId = objects.length > 0 ? Math.max(...objects.map(o => o.id)) : -1;
             object_id_counter = maxId + 1; 
             
@@ -446,29 +405,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    /**
-     * Función auxiliar para obtener el ID existente.
-     */
-    window.getCurrentDrawId = function() {
-        // Retorna el ID (número) o null si es un dibujo nuevo.
-        return window.current_draw_id > 0 ? window.current_draw_id : null; 
-    };
-    
-    // ------------------------------------------------------------------------
-    // --- Inicialización y Asignación de Eventos ---
-    // ------------------------------------------------------------------------
 
-    // Asignar eventos a botones de herramientas
+    window.getCurrentDrawId = function() {
+        return window.current_draw_id > 0 ? window.current_draw_id : null;
+    };
+
     if (circle_btn) circle_btn.addEventListener('click', () => select_tool(circle_btn, 'circle'));
     if (square_btn) square_btn.addEventListener('click', () => select_tool(square_btn, 'square'));
     if (triangle_btn) triangle_btn.addEventListener('click', () => select_tool(triangle_btn, 'triangle'));
     if (star_btn) star_btn.addEventListener('click', () => select_tool(star_btn, 'star'));
     if (free_draw_btn) free_draw_btn.addEventListener('click', () => select_tool(free_draw_btn, 'freeDraw'));
 
-    // Asignar eventos de control
     if (clear_btn) clear_btn.addEventListener('click', clear_canvas);
 
-    // Listener para edición de objeto seleccionado (color)
     if (color_picker) {
         color_picker.addEventListener('input', () => {
             const { color } = update_color_and_size();
@@ -480,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listener para edición de objeto seleccionado (tamaño)
     if (size_picker) {
         size_picker.addEventListener('input', () => {
             const { size } = update_color_and_size();
@@ -492,21 +440,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Eventos del ratón para dibujo y arrastre
     canvas.addEventListener('mousedown', start_drawing);
     canvas.addEventListener('mouseup', stop_drawing);
     canvas.addEventListener('mousemove', handle_mouse_move);
     canvas.addEventListener('mouseleave', stop_drawing);
 
-    // Configuración inicial y carga
     window.addEventListener('resize', resize_canvas);
 
-    // Llamadas iniciales
-    resize_canvas(); // Inicializa el tamaño del canvas
+    resize_canvas();
     update_color_and_size();
     select_tool(free_draw_btn, 'freeDraw'); 
     
-    // ⭐️ LÓGICA DE CARGA INICIAL ⭐️
     if (window.initial_drawing_content && window.initial_drawing_content !== '{}') {
         console.log("Cargando dibujo existente.");
         window.loadDrawing(window.initial_drawing_content);
