@@ -48,14 +48,14 @@ public class gallery_controller {
             boolean success = trash_service.move_to_trash(draw_id, user_id);
 
             if (success) {
-                return "redirect:/gallery/private?message=Dibujo movido a papelera.";
+                return "redirect:/gallery/private?message=Dibujo movido a papelera con exito.";
             } else {
-                return "redirect:/gallery?error=Acceso denegado o dibujo no encontrado.";
+                return "redirect:/gallery/private?error=No tienes permisos para mover este dibujo a la papelera.";
             }
 
         } catch (Exception e) {
             System.err.println("Error al mover a papelera: " + e.getMessage());
-            return "redirect:/gallery?error=Error interno al mover a papelera.";
+            return "redirect:/gallery/private?error=Error interno al intentar mover el dibujo.";
         }
     }
 

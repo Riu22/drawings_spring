@@ -98,39 +98,6 @@ public class draw_dao {
         return keyHolder.getKey().intValue();
     }
 
-    public int get_latest_version_number(int draw_id) {
-        String sql = "SELECT MAX(version_number) FROM version WHERE draw_id = ?";
-        Integer max_version = jdbcTemplate.queryForObject(sql, Integer.class, draw_id);
-        return max_version != null ? max_version : 0;
-    }
-
-
-    public List<draw> select_owners_draws(int userId){
-        String sql = """
-        SELECT id, user_id, title, created_at, ispublic
-        FROM draw
-        WHERE in_trash = FALSE
-          AND id IN (
-            SELECT id FROM draw WHERE user_id = ? 
-            UNION
-            SELECT draw_id FROM permissios WHERE user_id = ? AND (can_read = TRUE OR can_write = TRUE)
-          )
-        ORDER BY created_at DESC
-        """;        return jdbcTemplate.query(sql, drawRowMapper(), userId, userId);
-    }
-
-
-    public version select_latest_draw_version(int draw_id){
-        String sql = "SELECT id, draw_id, version_number, created_at FROM version WHERE draw_id = ? ORDER BY version_number DESC LIMIT 1";
-        try {
-            return jdbcTemplate.queryForObject(sql, versionRowMapper(), draw_id);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-
-
     public draw_data select_draw_data(int version_id){
         String sql = "SELECT version_id, draw_content FROM draw_data WHERE version_id = ?";
         try {
@@ -165,61 +132,20 @@ public class draw_dao {
         return jdbcTemplate.update(sql, draw_id);
     }
 
-    public int update_draw_to_trashed(int draw_id, int user_id) {
-        String sql = "UPDATE draw SET in_trash = TRUE WHERE id = ? AND user_id = ?";
-        return jdbcTemplate.update(sql, draw_id, user_id);
+    public int update_draw_to_trashed(int draw_id) {
+        String sql = "UPDATE draw SET in_trash = TRUE WHERE id = ?";
+        return jdbcTemplate.update(sql, draw_id);
     }
 
-    public int rescue_draw_from_trash(int draw_id, int user_id) {
-        String sql = "UPDATE draw SET in_trash = FALSE WHERE id = ? AND user_id = ?";
-        return jdbcTemplate.update(sql, draw_id, user_id);
+    public int rescue_draw_from_trash(int draw_id) {
+        String sql = "UPDATE draw SET in_trash = FALSE WHERE id = ?";
+        return jdbcTemplate.update(sql, draw_id);
     }
 
-    public void save_or_update_permissions(int draw_id, int user_id, boolean can_read, boolean can_write) {
-        String checkSql = "SELECT COUNT(*) FROM permissios WHERE draw_id = ? AND user_id = ?";
-        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, draw_id, user_id);
-
-        if (count > 0) {
-            String updateSql = "UPDATE permissios SET can_read = ?, can_write = ? WHERE draw_id = ? AND user_id = ?";
-            jdbcTemplate.update(updateSql, can_read, can_write, draw_id, user_id);
-        } else {
-            // INSERT: Si no existe, crea la entrada
-            String insertSql = "INSERT INTO permissios (draw_id, user_id, can_read, can_write) VALUES (?, ?, ?, ?)";
-            jdbcTemplate.update(insertSql, draw_id, user_id, can_read, can_write);
-        }
-    }
-
-    /**
-     * Elimina los permisos de un usuario sobre un dibujo (si ambos permisos son falsos).
-     */
-    public int delete_permissions(int draw_id, int user_id) {
-        String sql = "DELETE FROM permissios WHERE draw_id = ? AND user_id = ?";
-        return jdbcTemplate.update(sql, draw_id, user_id);
-    }
-
-    public Optional<permissions> get_permissions_for_user(int draw_id, int user_id) {
-        String sql = "SELECT user_id, draw_id, can_read, can_write FROM permissios WHERE draw_id = ? AND user_id = ?";
-        try {
-            permissions result = jdbcTemplate.queryForObject(sql, permissionRowMapper(), user_id, draw_id);
-            return Optional.ofNullable(result);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
     public boolean is_owner(int drawId, int userId) {
         String sql = "SELECT COUNT(*) FROM draw WHERE id = ? AND user_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, drawId, userId);
         return count != null && count > 0;
-    }
-
-    public boolean get_can_write_permission(int drawId, int userId) {
-        String sql = "SELECT can_write FROM permissios WHERE draw_id = ? AND user_id = ?";
-
-        try {
-            return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, drawId, userId));
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
     }
 
     public List<draw> select_viewable_draws(int userId) {
@@ -252,21 +178,5 @@ public class draw_dao {
         return jdbcTemplate.query(sql, versionRowMapper(), draw_id);
     }
 
-
-    public Optional<version> select_version_by_number(int draw_id, int version_number) {
-        String sql = "SELECT id, draw_id, version_number, created_at FROM version WHERE draw_id = ? AND version_number = ?";
-        try {
-            version result = jdbcTemplate.queryForObject(sql, versionRowMapper(), draw_id, version_number);
-            return Optional.ofNullable(result);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    public String select_autor_by_id(int user_id){
-        String sql = "SELECT username FROM users WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, String.class, user_id);
-
-    }
 
 }

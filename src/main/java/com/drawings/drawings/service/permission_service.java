@@ -49,11 +49,21 @@ public class permission_service {
     }
 
     public boolean can_user_read(int drawId, int userId) {
+        System.out.println("=== DEBUG can_user_read ===");
+        System.out.println("drawId: " + drawId + ", userId: " + userId);
+
         if (draw_dao.is_owner(drawId, userId)) {
+            System.out.println("Usuario es propietario");
             return true;
         }
 
         Optional<permissions> perms = permission_dao.get_permissions_for_user(drawId, userId);
+        System.out.println("Permisos encontrados: " + perms.isPresent());
+
+        if (perms.isPresent()) {
+            System.out.println("can_read: " + perms.get().isCan_read());
+            System.out.println("can_write: " + perms.get().isCan_write());
+        }
 
         return perms.isPresent() && (perms.get().isCan_read() || perms.get().isCan_write());
     }

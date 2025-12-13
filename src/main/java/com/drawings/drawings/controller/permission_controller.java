@@ -36,10 +36,6 @@ public class permission_controller {
 
         String username = (String) session.getAttribute("username");
 
-        if (username == null) {
-            return "ERROR_UNAUTHORIZED";
-        }
-
         try {
             int requester_id = save_service.iduser(username);
 

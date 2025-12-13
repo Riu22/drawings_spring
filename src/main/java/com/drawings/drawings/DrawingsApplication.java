@@ -52,7 +52,8 @@ public class DrawingsApplication implements WebMvcConfigurer {
                 .addPathPatterns("/draw/**")
                 .addPathPatterns("/gallery/**")
                 .addPathPatterns("/view/**")
-                .addPathPatterns("/share/**");
+                .addPathPatterns("/share/**")
+                .addPathPatterns("/grant");
 
     }
 }

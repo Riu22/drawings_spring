@@ -9,6 +9,8 @@ public class permissions {
     public permissions(int user_id, int draw_id, boolean can_read, boolean can_write) {
         this.user_id = user_id;
         this.draw_id = draw_id;
+        this.can_read = can_read;
+        this.can_write = can_write;
     }
 
     public int getUser_id() {

@@ -24,11 +24,12 @@ public class trash_service {
     permission_dao permission_dao;
     @Autowired
     data_version_dao data_version_dao;
+    @Autowired
+    permission_service permission_service;
 
 
     public List<gallery_record> get_trashed_draws(int owner_id) {
         List<draw> trashed_draws = draw_dao.select_trashed_draws(owner_id);
-        String author = user_dao.select_autor_by_id(owner_id);
 
         if (trashed_draws.isEmpty()) {
             return new ArrayList<>();
@@ -36,6 +37,8 @@ public class trash_service {
 
         List<gallery_record> gallery_items = new ArrayList<>();
         for (draw d : trashed_draws) {
+            String author = user_dao.select_autor_by_id(d.getUser_id());
+
             gallery_record item = new gallery_record(
                     d.getId(),
                     d.getTitle(),
@@ -75,20 +78,36 @@ public class trash_service {
 
     public boolean move_to_trash(int draw_id, int user_id) {
         try {
-            int rows_affected = draw_dao.update_draw_to_trashed(draw_id, user_id);
+            boolean can_edit = permission_service.can_user_write(draw_id, user_id);
+
+            if (!can_edit) {
+                System.out.println("Usuario " + user_id + " sin permisos para mover dibujo " + draw_id);
+                return false;
+            }
+
+            int rows_affected = draw_dao.update_draw_to_trashed(draw_id);
             return rows_affected > 0;
         } catch (Exception e) {
             System.err.println("Error al intentar mover el dibujo ID " + draw_id + " a la papelera: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
     public boolean rescue_from_trash(int draw_id, int user_id) {
         try {
-            int rows_affected = draw_dao.rescue_draw_from_trash(draw_id, user_id);
+            boolean can_edit = permission_service.can_user_write(draw_id, user_id);
+
+            if (!can_edit) {
+                System.out.println("Usuario " + user_id + " sin permisos para rescatar dibujo " + draw_id);
+                return false;
+            }
+
+            int rows_affected = draw_dao.rescue_draw_from_trash(draw_id);
             return rows_affected > 0;
         } catch (Exception e) {
             System.err.println("Error al intentar rescatar el dibujo ID " + draw_id + " de la papelera: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

@@ -14,6 +14,14 @@
     <a href="/logout">Logout</a>
 </nav>
 
+<div class="message-success" th:if="${param.message}">
+    <span th:text="${param.message}"></span>
+</div>
+
+<div class="message-error" th:if="${param.error}">
+    <span th:text="${param.error}"></span>
+</div>
+
 <div th:each="drawing : ${draws}">
     <h3 th:text="${drawing.title()}">Título del Dibujo</h3>
     <p>Author: <span th:text="${drawing.author}">1</span></p>
@@ -31,12 +39,14 @@
         Editar
     </a>
 
-    <a th:href="@{/gallery/trash/{id}(id=${drawing.id()})}"
+    <a th:if="${drawing.can_edit()}"
+       th:href="@{/gallery/trash/{id}(id=${drawing.id()})}"
        onclick="return confirm('¿Está seguro de que desea enviar este dibujo a la papelera?');">
         Papelera
     </a>
 
-    <a th:href="@{/share/{id}(id=${drawing.id()})}">
+    <a th:if="${drawing.user_id() == logged_user_id}"
+       th:href="@{/share/{id}(id=${drawing.id()})}">
         Compartir
     </a>
 
@@ -52,7 +62,6 @@
 
         const title = prompt('Introduce un título para la copia del dibujo (opcional):');
 
-        // Si el usuario cancela el prompt, no hacer nada
         if (title === null) {
             return;
         }
@@ -75,6 +84,24 @@
         document.body.appendChild(form);
         form.submit();
     }
+
+    // Auto-ocultar mensajes después de 5 segundos
+    setTimeout(function() {
+        const successMsg = document.querySelector('.message-success');
+        const errorMsg = document.querySelector('.message-error');
+
+        if (successMsg) {
+            successMsg.style.transition = 'opacity 0.5s';
+            successMsg.style.opacity = '0';
+            setTimeout(() => successMsg.remove(), 500);
+        }
+
+        if (errorMsg) {
+            errorMsg.style.transition = 'opacity 0.5s';
+            errorMsg.style.opacity = '0';
+            setTimeout(() => errorMsg.remove(), 500);
+        }
+    }, 5000);
 </script>
 </body>
 </html>

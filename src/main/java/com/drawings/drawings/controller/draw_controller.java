@@ -120,9 +120,8 @@ public class draw_controller {
     public String load_draw(@PathVariable("drawId") int draw_id, Model model, HttpSession session){
 
         String username = (String) session.getAttribute("username");
-        try {
-            int user_id = save_service.iduser(username);
 
+        try {
             Optional<draw> optional_draw = load_service.get_draw_metadata(draw_id);
 
             if (optional_draw.isEmpty()) {
@@ -130,13 +129,30 @@ public class draw_controller {
             }
 
             draw draw_metadata = optional_draw.get();
+
             String author = load_service.get_author(draw_metadata.getUser_id());
 
-            boolean canView = draw_metadata.isPublic() ||
-                    draw_metadata.getUser_id() == user_id ||
-                    permission_service.can_user_read(draw_id, user_id);
+            boolean canView;
+
+            if (username == null) {
+                canView = draw_metadata.isPublic();
+                System.out.println("Usuario NO autenticado. CanView (solo público): " + canView);
+            } else {
+                int user_id = save_service.iduser(username);
+                System.out.println("Usuario autenticado. User ID: " + user_id);
+
+                boolean isOwner = draw_metadata.getUser_id() == user_id;
+                boolean hasReadPermission = permission_service.can_user_read(draw_id, user_id);
+
+                System.out.println("Es propietario: " + isOwner);
+                System.out.println("Tiene permiso de lectura: " + hasReadPermission);
+
+                canView = draw_metadata.isPublic() || isOwner || hasReadPermission;
+                System.out.println("CanView final: " + canView);
+            }
 
             if (!canView) {
+                System.out.println("ACCESO DENEGADO");
                 return "redirect:/error?message=Acceso denegado al dibujo";
             }
 
@@ -150,11 +166,9 @@ public class draw_controller {
 
             return "viewdraw";
 
-        } catch (java.util.NoSuchElementException e) {
-            return "redirect:/error?message=Usuario no válido";
-
         } catch (Exception e) {
             System.err.println("Error al cargar el dibujo ID " + draw_id + ": " + e.getMessage());
+            e.printStackTrace();
             return "redirect:/error?message=Error interno al cargar el dibujo";
         }
     }
@@ -166,10 +180,6 @@ public class draw_controller {
                                Model model) {
 
         String username = (String) session.getAttribute("username");
-
-        if (username == null) {
-            return "redirect:/login";
-        }
 
         try {
             int userId = save_service.iduser(username);
@@ -258,9 +268,6 @@ public class draw_controller {
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
 
-        if (username == null) {
-            return "redirect:/login";
-        }
 
         try {
             int loggedUserId = save_service.iduser(username);
@@ -305,10 +312,6 @@ public class draw_controller {
                                HttpSession session) {
 
         String username = (String) session.getAttribute("username");
-
-        if (username == null) {
-            return "redirect:/login";
-        }
 
         try {
             int userId = save_service.iduser(username);

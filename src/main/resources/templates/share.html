@@ -44,7 +44,7 @@
         const grantButton = document.getElementById('grantPermissionsBtn');
         const messageArea = document.getElementById('messageArea');
 
-        if (!drawIdInput || !grantButton) return; // Asegurar que los elementos existen
+        if (!drawIdInput || !grantButton) return;
 
         grantButton.addEventListener('click', async () => {
 
@@ -53,14 +53,16 @@
             const can_read = canReadCheckbox.checked;
             const can_write = canWriteCheckbox.checked;
 
-            messageArea.textContent = 'Procesando...';
-            messageArea.style.color = 'blue';
+            messageArea.textContent = '';
 
             if (!collaboratorUsername) {
                 messageArea.textContent = 'Por favor, introduce el nombre de usuario del colaborador.';
                 messageArea.style.color = 'red';
                 return;
             }
+
+            messageArea.textContent = 'Procesando...';
+            messageArea.style.color = 'blue';
 
             const dataToSend = {
                 draw_id: draw_id,
